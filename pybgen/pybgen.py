@@ -34,7 +34,7 @@ from io import UnsupportedOperation
 
 import numpy as np
 
-from six.moves import zip, range
+from six.moves import range
 
 try:
     import zstd
