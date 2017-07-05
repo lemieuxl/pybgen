@@ -4,6 +4,9 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install --only-upgrade -y sqlite3 sqlite3-dev
 install:
   - pip install -U pip
   - pip install -U setuptools
