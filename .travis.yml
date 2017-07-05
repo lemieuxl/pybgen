@@ -8,8 +8,6 @@ python:
 install:
   - pip install six
   - pip install numpy
-  - pip install pandas
-  - pip install -U mock
   - pip install coveralls
 script:
   - coverage run setup.py test
