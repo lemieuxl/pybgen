@@ -1,0 +1,7 @@
+
+# pybgen - Module to process BGEN files
+
+`PyBGEN` is a Python module to read and write BGEN binary files and extract
+dosage data.
+
+

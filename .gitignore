@@ -1,0 +1,17 @@
+*.swp
+*.swo
+*~
+*.pyc
+dist
+conda_dist
+*.egg-info
+test
+pybgen/version.py
+
+.coverage
+htmlcov
+
+.ipynb_checkpoints
+
+build
+_build
