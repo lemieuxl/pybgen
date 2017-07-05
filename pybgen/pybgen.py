@@ -25,7 +25,10 @@
 # THE SOFTWARE.
 
 
+from __future__ import division
+
 import os
+import sys
 import zlib
 import logging
 import sqlite3
@@ -53,6 +56,10 @@ __all__ = ["PyBGEN"]
 
 # The logger
 logger = logging.getLogger(__name__)
+
+
+# The python version
+PYTHON_VERSION = sys.version_info.major
 
 
 class _Variant(object):
@@ -372,7 +379,8 @@ class PyBGEN(object):
 
             # TODO: Check ploidy for sexual chromosomes
             # The minimum and maximum for ploidy (we only accept ploidy of 2)
-            min_ploidy, max_ploidy = data[:2]
+            min_ploidy = self._byte_to_int(data[0])
+            max_ploidy = self._byte_to_int(data[1])
             if min_ploidy != 2 and max_ploidy != 2:
                 raise ValueError(
                     "{}: only accepting ploidy of "
@@ -382,9 +390,9 @@ class PyBGEN(object):
 
             # Check the list of N bytes for missingness (since we assume only
             # diploid values for each sample)
-            ploidy_info = data[:n]
+            ploidy_info = np.fromstring(data[:n], dtype=np.uint8)
             ploidy_info = np.unpackbits(
-                np.array([[_] for _ in ploidy_info], dtype=np.uint8),
+                ploidy_info.reshape(1, ploidy_info.shape[0]).T,
                 axis=1,
             )
             missing_data = ploidy_info[:, 0] == 1
@@ -401,7 +409,7 @@ class PyBGEN(object):
             data = data[1:]
 
             # The number of bytes used to encode each probabilities
-            b = data[0]
+            b = self._byte_to_int(data[0])
             if b % 8 != 0:
                 raise ValueError(
                     "{}: only multuple of 8 encoding is "
@@ -485,10 +493,8 @@ class PyBGEN(object):
         self._bgen.read(self._header_size - 20)
 
         # Reading the flag
-        flag = np.unpackbits(
-            np.array([[_] for _ in self._bgen.read(4)], dtype=np.uint8),
-            axis=1,
-        )
+        flag = np.fromstring(self._bgen.read(4), dtype=np.uint8)
+        flag = np.unpackbits(flag.reshape(1, flag.shape[0]).T, axis=1)
 
         # Getting the compression type from the layout
         compression = self._bits_to_int(flag[0, -2:])
@@ -575,6 +581,20 @@ class PyBGEN(object):
         for bit in bits:
             result = (result << 1) | bit
         return result
+
+    @staticmethod
+    def _byte_to_int_python3(byte):
+        """Converts a byte to a int for python 3."""
+        return byte
+
+    @staticmethod
+    def _byte_to_int_python2(byte):
+        """Converts a byte to a int for python 2."""
+        return unpack("B", byte)[0]
+
+    _byte_to_int = _byte_to_int_python3
+    if PYTHON_VERSION < 3:
+        _byte_to_int = _byte_to_int_python2
 
     @staticmethod
     def _no_decompress(data):
