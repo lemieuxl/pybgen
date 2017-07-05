@@ -125,7 +125,7 @@ class PyBGEN(object):
     def __repr__(self):
         """The representation of the PyBGEN object."""
         if self._mode == "r":
-            return "PyBGEN({:,d} samples; {:,d} markers)".format(
+            return "PyBGEN({:,d} samples; {:,d} variants)".format(
                 self._nb_samples, self._nb_variants,
             )
 
