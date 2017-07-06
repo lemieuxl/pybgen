@@ -379,8 +379,8 @@ class PyBGEN(object):
 
             # TODO: Check ploidy for sexual chromosomes
             # The minimum and maximum for ploidy (we only accept ploidy of 2)
-            min_ploidy = self._byte_to_int(data[0])
-            max_ploidy = self._byte_to_int(data[1])
+            min_ploidy = _byte_to_int(data[0])
+            max_ploidy = _byte_to_int(data[1])
             if min_ploidy != 2 and max_ploidy != 2:
                 raise ValueError(
                     "{}: only accepting ploidy of "
@@ -409,7 +409,7 @@ class PyBGEN(object):
             data = data[1:]
 
             # The number of bytes used to encode each probabilities
-            b = self._byte_to_int(data[0])
+            b = _byte_to_int(data[0])
             if b % 8 != 0:
                 raise ValueError(
                     "{}: only multuple of 8 encoding is "
@@ -497,7 +497,7 @@ class PyBGEN(object):
         flag = np.unpackbits(flag.reshape(1, flag.shape[0]).T, axis=1)
 
         # Getting the compression type from the layout
-        compression = self._bits_to_int(flag[0, -2:])
+        compression = _bits_to_int(flag[0, -2:])
         self._is_compressed = False
         if compression == 0:
             # No decompression required
@@ -517,7 +517,7 @@ class PyBGEN(object):
             self._is_compressed = True
 
         # Getting the layout
-        layout = self._bits_to_int(flag[0, -6:-2])
+        layout = _bits_to_int(flag[0, -6:-2])
         if layout == 0:
             raise ValueError(
                 "{}: invalid BGEN file".format(self._bgen.name)
@@ -575,27 +575,28 @@ class PyBGEN(object):
                              "and index file".format(self._bgen.name))
 
     @staticmethod
-    def _bits_to_int(bits):
-        """Converts bits to int."""
-        result = 0
-        for bit in bits:
-            result = (result << 1) | bit
-        return result
-
-    @staticmethod
-    def _byte_to_int_python3(byte):
-        """Converts a byte to a int for python 3."""
-        return byte
-
-    @staticmethod
-    def _byte_to_int_python2(byte):
-        """Converts a byte to a int for python 2."""
-        return unpack("B", byte)[0]
-
-    _byte_to_int = _byte_to_int_python3
-    if PYTHON_VERSION < 3:
-        _byte_to_int = _byte_to_int_python2
-
-    @staticmethod
     def _no_decompress(data):
         return data
+
+
+def _bits_to_int(bits):
+    """Converts bits to int."""
+    result = 0
+    for bit in bits:
+        result = (result << 1) | bit
+    return result
+
+
+def _byte_to_int_python3(byte):
+    """Converts a byte to a int for python 3."""
+    return byte
+
+
+def _byte_to_int_python2(byte):
+    """Converts a byte to a int for python 2."""
+    return unpack("B", byte)[0]
+
+
+_byte_to_int = _byte_to_int_python3
+if PYTHON_VERSION < 3:
+    _byte_to_int = _byte_to_int_python2
