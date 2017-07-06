@@ -71,3 +71,35 @@ with bz2.BZ2File(fn, "r") as f:
             "variant": variant,
             "dosage": dosage,
         }
+
+
+# Creating the truth value for the 'cohort1.bgen' file
+fn = resource_filename(
+    __name__, os.path.join("data", "cohort1.truths.txt.bz2"),
+)
+cohort1_truths = {}
+with bz2.BZ2File(fn, "r") as f:
+    # Reading the data
+    data = tuple(
+        row.strip().split("\t") for row in f.read().decode().splitlines()
+    )
+
+    # This file contains no sample
+    cohort1_truths["samples"] = None
+    cohort1_truths["nb_samples"] = 500
+
+    # The first column of each row contains the markers
+    markers = tuple(row[0] for row in data[1:])
+    cohort1_truths["variant_set"] = set(markers)
+    cohort1_truths["nb_variants"] = len(markers)
+
+    # Now, constructing the variants
+    cohort1_truths["variants"] = {}
+    for variant_data in data[1:]:
+        name, chrom, pos, a1, a2 = variant_data[:5]
+        variant = Variant(name, chrom, int(pos), a1, a2)
+        dosage = np.array(variant_data[5:], dtype=float)
+        cohort1_truths["variants"][name] = {
+            "variant": variant,
+            "dosage": dosage,
+        }

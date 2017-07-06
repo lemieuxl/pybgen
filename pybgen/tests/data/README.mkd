@@ -1,0 +1,22 @@
+
+# Test Dataset
+
+## Truths
+
+The *BGEN* files were converted into VCF format using the
+[`bgenix`](https://bitbucket.org/gavinband/bgen/wiki/bgenix) tool in order to
+get the truth values for the tests.
+
+
+## Origin of test files
+
+### `example.32bits.bgen`
+
+The file was taken from the [BGEN reference
+implementation](https://bitbucket.org/gavinband/bgen).
+
+### `cohort1.bgen`
+
+The file was extracted from the
+[SNPTEST](https://mathgen.stats.ox.ac.uk/genetics_software/snptest/snptest.html#download)
+download.
