@@ -17,8 +17,9 @@ before_install:
   - conda info -a
   - python --version
 install:
-  - conda install nomkl
+  - conda install -q nomkl
   - conda install -q six numpy
+  - pip install --no-deps zstandard
   - pip install -U coveralls
 script:
   - coverage run setup.py test
