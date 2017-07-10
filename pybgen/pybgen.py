@@ -32,10 +32,12 @@ import sys
 import zlib
 import logging
 import sqlite3
+from math import ceil
 from struct import unpack
 from io import UnsupportedOperation
 
 import numpy as np
+from bitstring import Bits
 
 from six.moves import range
 
@@ -288,34 +290,34 @@ class PyBGEN(object):
     def _get_curr_variant_info(self):
         """Gets the current variant's information."""
         if self._layout == 1:
-            n = unpack("I", self._bgen.read(4))[0]
+            n = unpack("<I", self._bgen.read(4))[0]
             if n != self._nb_samples:
                 raise ValueError(
                     "{}: invalid BGEN file".format(self._bgen.name),
                 )
 
         # Reading the variant id
-        var_id = self._bgen.read(unpack("H", self._bgen.read(2))[0]).decode()
+        var_id = self._bgen.read(unpack("<H", self._bgen.read(2))[0]).decode()
 
         # Reading the variant rsid
-        rs_id = self._bgen.read(unpack("H", self._bgen.read(2))[0]).decode()
+        rs_id = self._bgen.read(unpack("<H", self._bgen.read(2))[0]).decode()
 
         # Reading the chromosome
-        chrom = self._bgen.read(unpack("H", self._bgen.read(2))[0]).decode()
+        chrom = self._bgen.read(unpack("<H", self._bgen.read(2))[0]).decode()
 
         # Reading the position
-        pos = unpack("I", self._bgen.read(4))[0]
+        pos = unpack("<I", self._bgen.read(4))[0]
 
         # Getting the number of alleles
         nb_alleles = 2
         if self._layout == 2:
-            nb_alleles = unpack("H", self._bgen.read(2))[0]
+            nb_alleles = unpack("<H", self._bgen.read(2))[0]
 
         # Getting the alleles
         alleles = []
         for _ in range(nb_alleles):
             alleles.append(self._bgen.read(
-                unpack("I", self._bgen.read(4))[0]
+                unpack("<I", self._bgen.read(4))[0]
             ).decode())
 
         return var_id, rs_id, chrom, pos, tuple(alleles)
@@ -326,7 +328,7 @@ class PyBGEN(object):
         if self._layout == 1:
             c = self._nb_samples
             if self._is_compressed:
-                c = unpack("I", self._bgen.read(4))[0]
+                c = unpack("<I", self._bgen.read(4))[0]
 
             # Getting the probabilities
             probs = np.fromstring(
@@ -340,7 +342,7 @@ class PyBGEN(object):
 
         else:
             # The total length C of the rest of the data for this variant
-            c = unpack("I", self._bgen.read(4))[0]
+            c = unpack("<I", self._bgen.read(4))[0]
 
             # The number of bytes to read
             to_read = c
@@ -350,7 +352,7 @@ class PyBGEN(object):
             if self._is_compressed:
                 # The total length D of the probability data after
                 # decompression
-                d = unpack("I", self._bgen.read(4))[0]
+                d = unpack("<I", self._bgen.read(4))[0]
                 to_read = c - 4
 
             # Reading the data and checking
@@ -361,7 +363,7 @@ class PyBGEN(object):
                 )
 
             # Checking the number of samples
-            n = unpack("I", data[:4])[0]
+            n = unpack("<I", data[:4])[0]
             if n != self._nb_samples:
                 raise ValueError(
                     "{}: invalid BGEN file".format(self._bgen.name)
@@ -369,7 +371,7 @@ class PyBGEN(object):
             data = data[4:]
 
             # Checking the number of alleles (we only accept 2 alleles)
-            nb_alleles = unpack("H", data[:2])[0]
+            nb_alleles = unpack("<H", data[:2])[0]
             if nb_alleles != 2:
                 raise ValueError(
                     "{}: only two alleles are "
@@ -408,20 +410,14 @@ class PyBGEN(object):
                 )
             data = data[1:]
 
-            # The number of bytes used to encode each probabilities
+            # The number of bits used to encode each probabilities
             b = _byte_to_int(data[0])
-            if b % 8 != 0:
-                raise ValueError(
-                    "{}: only multuple of 8 encoding is "
-                    "accepted".format(self._bgen.name)
-                )
             data = data[1:]
 
             # Reading the probabilities (don't forget we allow only for diploid
             # values)
-            probs = np.fromstring(
-                data, dtype="u{}".format(b // 8)
-            ) / (2**b - 1)
+            # TODO: Check that len(data) * 8 / b / 2 = nb_samples
+            probs = _pack_bits(data, b) / (2**b - 1)
             probs.shape = (self._nb_samples, 2)
 
             # Computing the dosage
@@ -471,20 +467,20 @@ class PyBGEN(object):
     def _parse_header_block(self):
         """Parses the header block."""
         # Getting the data offset (the start point of the data
-        self._offset = unpack("I", self._bgen.read(4))[0]
+        self._offset = unpack("<I", self._bgen.read(4))[0]
 
         # Getting the header size
-        self._header_size = unpack("I", self._bgen.read(4))[0]
+        self._header_size = unpack("<I", self._bgen.read(4))[0]
 
         # Getting the number of samples and variants
-        self._nb_variants = unpack("I", self._bgen.read(4))[0]
-        self._nb_samples = unpack("I", self._bgen.read(4))[0]
+        self._nb_variants = unpack("<I", self._bgen.read(4))[0]
+        self._nb_samples = unpack("<I", self._bgen.read(4))[0]
 
         # Checking the magic number
         magic = self._bgen.read(4)
         if magic != b"bgen":
             # The magic number might be 0, then
-            if unpack("I", magic)[0] != 0:
+            if unpack("<I", magic)[0] != 0:
                 raise ValueError(
                     "{}: invalid BGEN file.".format(self._bgen.name)
                 )
@@ -537,14 +533,14 @@ class PyBGEN(object):
     def _parse_sample_block(self):
         """Parses the sample block."""
         # Getting the block size
-        block_size = unpack("I", self._bgen.read(4))[0]
+        block_size = unpack("<I", self._bgen.read(4))[0]
         if block_size + self._header_size > self._offset:
             raise ValueError(
                 "{}: invalid BGEN file".format(self._bgen.name)
             )
 
         # Checking the number of samples
-        n = unpack("I", self._bgen.read(4))[0]
+        n = unpack("<I", self._bgen.read(4))[0]
         if n != self._nb_samples:
             raise ValueError(
                 "{}: invalid BGEN file".format(self._bgen.name)
@@ -553,7 +549,7 @@ class PyBGEN(object):
         # Getting the sample information
         samples = []
         for i in range(self._nb_samples):
-            size = unpack("H", self._bgen.read(2))[0]
+            size = unpack("<H", self._bgen.read(2))[0]
             samples.append(self._bgen.read(size).decode())
         self._samples = tuple(samples)
 
@@ -594,9 +590,37 @@ def _byte_to_int_python3(byte):
 
 def _byte_to_int_python2(byte):
     """Converts a byte to a int for python 2."""
-    return unpack("B", byte)[0]
+    return unpack("<B", byte)[0]
 
 
 _byte_to_int = _byte_to_int_python3
 if PYTHON_VERSION < 3:
     _byte_to_int = _byte_to_int_python2
+
+
+def _pack_bits(data, b):
+    """Unpacks BGEN probabilities (as bits)."""
+    # Getting the data from the bytes
+    data = np.fromiter(
+        ((_byte_to_int(byte) >> i) & 1 for byte in data for i in range(8)),
+        dtype=bool,
+    )
+    data.shape = (data.shape[0] // b, b)
+
+    # Finding the closest full bytes (if required)
+    # TODO: Improve this so that it is more efficient
+    full_bytes = data[:, ::-1]
+    if data.shape[1] % 8 != 0:
+        nb_bits = int(ceil(b / 8)) * 8
+        full_bytes = np.zeros((data.shape[0], nb_bits), dtype=bool)
+        full_bytes[:, -b:] += data[:, ::-1]
+
+    # Packing the bits
+    packed = np.packbits(full_bytes, axis=1)
+
+    # Left-shifting for final value
+    final = packed[:, 0]
+    for i in range(1, packed.shape[1]):
+        final = np.left_shift(final, 8, dtype=np.uint) | packed[:, i]
+
+    return final
