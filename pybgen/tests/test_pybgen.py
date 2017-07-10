@@ -35,7 +35,7 @@ from .. import pybgen
 from .truths import truths
 
 
-class _TestPyBGEN(unittest.TestCase):
+class PyBGENTestContainer(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -191,7 +191,7 @@ class _TestPyBGEN(unittest.TestCase):
         self.assertEqual(seen_variants, self.truths["variant_set"])
 
 
-class Test_1(_TestPyBGEN):
+class Test_1(PyBGENTestContainer):
 
     @classmethod
     def setUpClass(cls):
@@ -207,7 +207,7 @@ class Test_1(_TestPyBGEN):
         cls.truths = truths["example.32bits.truths.txt.bz2"]
 
 
-class Test_2(_TestPyBGEN):
+class Test_2(PyBGENTestContainer):
 
     @classmethod
     def setUpClass(cls):
@@ -223,7 +223,7 @@ class Test_2(_TestPyBGEN):
         cls.truths = truths["cohort1.truths.txt.bz2"]
 
 
-class Test_3(_TestPyBGEN):
+class Test_3(PyBGENTestContainer):
 
     @classmethod
     def setUpClass(cls):
@@ -239,7 +239,7 @@ class Test_3(_TestPyBGEN):
         cls.truths = truths["example.24bits.truths.txt.bz2"]
 
 
-class Test_4(_TestPyBGEN):
+class Test_4(PyBGENTestContainer):
 
     @classmethod
     def setUpClass(cls):
