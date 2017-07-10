@@ -10,10 +10,11 @@ get the truth values for the tests.
 
 ## Origin of test files
 
-### `example.32bits.bgen`
+### `example.XXbits.bgen`
 
-The file was taken from the [BGEN reference
-implementation](https://bitbucket.org/gavinband/bgen).
+Those files were taken from the
+[BGEN reference implementation](https://bitbucket.org/gavinband/bgen).
+
 
 ### `cohort1.bgen`
 

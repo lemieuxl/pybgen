@@ -41,9 +41,13 @@ __all__ = ["truths"]
 
 
 _FILENAMES = (
-    os.path.join("data", "example.3bits.truths.txt.bz2"),
     os.path.join("data", "example.32bits.truths.txt.bz2"),
     os.path.join("data", "example.24bits.truths.txt.bz2"),
+    os.path.join("data", "example.16bits.truths.txt.bz2"),
+    os.path.join("data", "example.16bits.zstd.truths.txt.bz2"),
+    os.path.join("data", "example.9bits.truths.txt.bz2"),
+    os.path.join("data", "example.8bits.truths.txt.bz2"),
+    os.path.join("data", "example.3bits.truths.txt.bz2"),
     os.path.join("data", "cohort1.truths.txt.bz2"),
 )
 

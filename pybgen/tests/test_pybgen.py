@@ -35,25 +35,23 @@ from .. import pybgen
 from .truths import truths
 
 
-class PyBGENTestContainer(unittest.TestCase):
+__all__ = ["reader_tests"]
+
+
+class ReaderTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         # Creating a temporary directory
         cls.tmp_dir = mkdtemp(prefix="pybgen_test_")
 
-        # Getting the BGEN file
-        cls.bgen_fn = resource_filename(
-            __name__,
-            os.path.join("data", "example.32bits.bgen"),
-        )
-
-        # Getting the truth for this file
-        cls.truths = truths["example.32bits.truths.txt.bz2"]
-
     def setUp(self):
+        # Getting the truth for this file
+        self.truths = truths[self.truth_filename]
+
         # Reading the BGEN file
-        self.bgen = pybgen.PyBGEN(self.bgen_fn)
+        bgen_fn = resource_filename(__name__, self.bgen_filename)
+        self.bgen = pybgen.PyBGEN(bgen_fn)
 
     @classmethod
     def tearDownClass(cls):
@@ -191,65 +189,45 @@ class PyBGENTestContainer(unittest.TestCase):
         self.assertEqual(seen_variants, self.truths["variant_set"])
 
 
-class Test_1(PyBGENTestContainer):
-
-    @classmethod
-    def setUpClass(cls):
-        super(Test_1, cls).setUpClass()
-
-        # Getting the BGEN file
-        cls.bgen_fn = resource_filename(
-            __name__,
-            os.path.join("data", "example.32bits.bgen"),
-        )
-
-        # Getting the truth for this file
-        cls.truths = truths["example.32bits.truths.txt.bz2"]
+class Test32bits(ReaderTests):
+    bgen_filename = os.path.join("data", "example.32bits.bgen")
+    truth_filename = "example.32bits.truths.txt.bz2"
 
 
-class Test_2(PyBGENTestContainer):
-
-    @classmethod
-    def setUpClass(cls):
-        super(Test_2, cls).setUpClass()
-
-        # Getting the BGEN file
-        cls.bgen_fn = resource_filename(
-            __name__,
-            os.path.join("data", "cohort1.bgen"),
-        )
-
-        # Getting the truth for this file
-        cls.truths = truths["cohort1.truths.txt.bz2"]
+class Test24bits(ReaderTests):
+    bgen_filename = os.path.join("data", "example.24bits.bgen")
+    truth_filename = "example.24bits.truths.txt.bz2"
 
 
-class Test_3(PyBGENTestContainer):
-
-    @classmethod
-    def setUpClass(cls):
-        super(Test_3, cls).setUpClass()
-
-        # Getting the BGEN file
-        cls.bgen_fn = resource_filename(
-            __name__,
-            os.path.join("data", "example.24bits.bgen"),
-        )
-
-        # Getting the truth for this file
-        cls.truths = truths["example.24bits.truths.txt.bz2"]
+class Test16bits(ReaderTests):
+    bgen_filename = os.path.join("data", "example.16bits.bgen")
+    truth_filename = "example.16bits.truths.txt.bz2"
 
 
-class Test_4(PyBGENTestContainer):
+class Test16bitsZstd(ReaderTests):
+    bgen_filename = os.path.join("data", "example.16bits.zstd.bgen")
+    truth_filename = "example.16bits.zstd.truths.txt.bz2"
 
-    @classmethod
-    def setUpClass(cls):
-        super(Test_4, cls).setUpClass()
 
-        # Getting the BGEN file
-        cls.bgen_fn = resource_filename(
-            __name__,
-            os.path.join("data", "example.3bits.bgen"),
-        )
+class Test9bits(ReaderTests):
+    bgen_filename = os.path.join("data", "example.9bits.bgen")
+    truth_filename = "example.9bits.truths.txt.bz2"
 
-        # Getting the truth for this file
-        cls.truths = truths["example.3bits.truths.txt.bz2"]
+
+class Test8bits(ReaderTests):
+    bgen_filename = os.path.join("data", "example.8bits.bgen")
+    truth_filename = "example.8bits.truths.txt.bz2"
+
+
+class Test3bits(ReaderTests):
+    bgen_filename = os.path.join("data", "example.3bits.bgen")
+    truth_filename = "example.3bits.truths.txt.bz2"
+
+
+class TestLayout1(ReaderTests):
+    bgen_filename = os.path.join("data", "cohort1.bgen")
+    truth_filename = "cohort1.truths.txt.bz2"
+
+
+reader_tests = (Test32bits, Test24bits, Test16bits, Test16bitsZstd, Test9bits,
+                Test8bits, Test3bits, TestLayout1)
