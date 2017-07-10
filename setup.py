@@ -11,7 +11,6 @@
 
 
 import os
-import sys
 from setuptools import setup
 
 
@@ -43,10 +42,6 @@ def write_version_file(fn=None):
 def get_requirements():
     # Initial requirements
     requirements = ["numpy >= 1.13.0", "six >= 1.10.0", "setuptools >= 27.0"]
-
-    # Checking if python 2 (requires mock)
-    if sys.version_info[0] == 2:
-        requirements.append(["mock >= 2.0.0"])
 
     return requirements
 
