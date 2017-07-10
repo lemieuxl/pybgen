@@ -37,7 +37,6 @@ from struct import unpack
 from io import UnsupportedOperation
 
 import numpy as np
-from bitstring import Bits
 
 from six.moves import range
 
