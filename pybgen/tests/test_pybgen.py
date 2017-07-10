@@ -204,6 +204,7 @@ class Test16bits(ReaderTests):
     truth_filename = "example.16bits.truths.txt.bz2"
 
 
+@unittest.skipIf(not pybgen.HAS_ZSTD, "module 'zstandard' not installed")
 class Test16bitsZstd(ReaderTests):
     bgen_filename = os.path.join("data", "example.16bits.zstd.bgen")
     truth_filename = "example.16bits.zstd.truths.txt.bz2"
