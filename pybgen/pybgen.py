@@ -242,6 +242,22 @@ class PyBGEN(object):
         # Return itself (the generator)
         return self
 
+    def iter_variant_info(self):
+        """Iterate over marker information."""
+        self._bgen_index.execute(
+            "SELECT chromosome, position, rsid, allele1, allele2 FROM Variant",
+        )
+
+        # The array size
+        array_size = 1000
+
+        # Fetching the results
+        results = self._bgen_index.fetchmany(array_size)
+        while results:
+            for chrom, pos, rsid, a1, a2 in results:
+                yield _Variant(rsid, chrom, pos, a1, a2)
+            results = self._bgen_index.fetchmany(array_size)
+
     def get_variant(self, name):
         """Gets the values for a given variant.
 
