@@ -188,6 +188,20 @@ class ReaderTests(unittest.TestCase):
         # Checking if we checked all variants
         self.assertEqual(seen_variants, self.truths["variant_set"])
 
+    def test_iter_variant_info(self):
+        """Tests the iteration of all variants' information."""
+        seen_variants = set()
+        for variant in self.bgen.iter_variant_info():
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.truths["variants"][name]["variant"],
+                variant,
+            )
+
 
 class Test32bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.32bits.bgen")
