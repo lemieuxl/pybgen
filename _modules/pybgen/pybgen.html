@@ -1,0 +1,770 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pybgen.pybgen &#8212; pybgen 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pybgen</a></h1>
+
+
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pybgen.html">pybgen’s API</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../pybgen.html">pybgen</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pybgen.pybgen</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module that reads BGEN files.&quot;&quot;&quot;</span>
+
+<span class="c1"># This file is part of pybgen.</span>
+<span class="c1">#</span>
+<span class="c1"># The MIT License (MIT)</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2017 Louis-Philippe Lemieux Perreault</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in</span>
+<span class="c1"># all copies or substantial portions of the Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span>
+<span class="c1"># THE SOFTWARE.</span>
+
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">zlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">ceil</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="k">import</span> <span class="n">unpack</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">UnsupportedOperation</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="nb">range</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">zstd</span>
+    <span class="n">HAS_ZSTD</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">HAS_ZSTD</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Louis-Philippe Lemieux Perreault&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2014 Louis-Philippe Lemieux Perreault&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;MIT&quot;</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PyBGEN&quot;</span><span class="p">]</span>
+
+
+<span class="c1"># The logger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="c1"># The python version</span>
+<span class="n">PYTHON_VERSION</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">major</span>
+
+
+<span class="k">class</span> <span class="nc">_Variant</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;chrom&quot;</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">,</span> <span class="s2">&quot;a1&quot;</span><span class="p">,</span> <span class="s2">&quot;a2&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chrom</span> <span class="o">=</span> <span class="n">chrom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">a1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">a2</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;Variant </span><span class="si">{}</span><span class="s2"> chr</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="PyBGEN"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN">[docs]</a><span class="k">class</span> <span class="nc">PyBGEN</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reads and store a set of BGEN files.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fn (str): The name of the BGEN file.</span>
+<span class="sd">        mode (str): The open mode for the BGEN file.</span>
+<span class="sd">        prob_t (float): The probability threshold (optional).</span>
+
+<span class="sd">    Reads or write BGEN files.</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from pybgen import PyBGEN</span>
+
+<span class="sd">        # Reading a BGEN file</span>
+<span class="sd">        with PyBGEN(&quot;bgen_file_name&quot;) as bgen:</span>
+<span class="sd">            pass</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">prob_t</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes a new PyBGEN instance.&quot;&quot;&quot;</span>
+        <span class="c1"># The mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">=</span> <span class="n">mode</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="c1"># Parsing the file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">()</span>
+
+            <span class="c1"># Did the samples were parsed?</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_sample</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># Connecting to the index</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fn</span> <span class="o">+</span> <span class="s2">&quot;.bgi&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: no such file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fn</span> <span class="o">+</span> <span class="s2">&quot;.bgi&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_connect_index</span><span class="p">()</span>
+
+            <span class="c1"># The probability</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prob_t</span> <span class="o">=</span> <span class="n">prob_t</span>
+
+            <span class="c1"># Where we&#39;re at in the file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s2">&quot;&#39;w&#39; mode not yet implemented&quot;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid mode: &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mode</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The representation of the PyBGEN object.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;PyBGEN(</span><span class="si">{:,d}</span><span class="s2"> samples; </span><span class="si">{:,d}</span><span class="s2"> variants)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_variants</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="s1">&#39;PyBGEN(mode=&quot;w&quot;)&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The __iter__ function.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">!=</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s2">&quot;not available in &#39;w&#39; mode&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The __next__ function.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Entering the context manager.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Exiting the context manager.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="PyBGEN.close"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Closes the BGEN object.&quot;&quot;&quot;</span>
+        <span class="c1"># Closing the BGEN file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Closing the index file (if in read mode)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nb_variants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the number of markers.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The number of markers in the dataset.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">!=</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s2">&quot;not available in &#39;w&#39; mode&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_variants</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nb_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the number of samples.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The number of samples in the dataset.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">!=</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s2">&quot;not available in &#39;w&#39; mode&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the samples.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: The samples.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span>
+
+<div class="viewcode-block" id="PyBGEN.next"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the next variant.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: The variant&#39;s information and its genotypes (dosage) as</span>
+<span class="sd">            :py:class:`numpy.ndarray`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">!=</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s2">&quot;not available in &#39;w&#39; mode&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_variants</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PyBGEN.iter_variants"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.iter_variants">[docs]</a>    <span class="k">def</span> <span class="nf">iter_variants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterates over variants from the beginning of the BGEN file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: A variant and the dosage.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">!=</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s2">&quot;not available in &#39;w&#39; mode&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Seeking back at the beginning of the file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT file_start_position &quot;</span>
+            <span class="s2">&quot;FROM Variant &quot;</span>
+            <span class="s2">&quot;ORDER BY file_start_position &quot;</span>
+            <span class="s2">&quot;LIMIT 1&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Return itself (the generator)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="PyBGEN.iter_variants_in_region"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.iter_variants_in_region">[docs]</a>    <span class="k">def</span> <span class="nf">iter_variants_in_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterates over variants in a specific region.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            chrom (str): The name of the chromosome.</span>
+<span class="sd">            start (int): The starting position of the region.</span>
+<span class="sd">            end (int): The ending position of the region.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Getting the region from the index file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT file_start_position &quot;</span>
+            <span class="s2">&quot;FROM Variant &quot;</span>
+            <span class="s2">&quot;WHERE chromosome = ? AND position &gt;= ? AND position &lt;= ?&quot;</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fetching all the seek positions</span>
+        <span class="n">seek_positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
+
+        <span class="c1"># Fetching seek positions, we return the variant</span>
+        <span class="k">for</span> <span class="n">seek_pos</span> <span class="ow">in</span> <span class="n">seek_positions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_pos</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PyBGEN.iter_variant_info"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.iter_variant_info">[docs]</a>    <span class="k">def</span> <span class="nf">iter_variant_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterate over marker information.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT chromosome, position, rsid, allele1, allele2 FROM Variant&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># The array size</span>
+        <span class="n">array_size</span> <span class="o">=</span> <span class="mi">1000</span>
+
+        <span class="c1"># Fetching the results</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchmany</span><span class="p">(</span><span class="n">array_size</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">rsid</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">_Variant</span><span class="p">(</span><span class="n">rsid</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchmany</span><span class="p">(</span><span class="n">array_size</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyBGEN.get_variant"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.get_variant">[docs]</a>    <span class="k">def</span> <span class="nf">get_variant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets the values for a given variant.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the variant.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list containing all the value for a given variant. The list</span>
+<span class="sd">            has more than one item if there are duplicated variants.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">!=</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s2">&quot;not available in &#39;w&#39; mode&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Fetching the variant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT file_start_position FROM Variant WHERE rsid = ?&quot;</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fetching all the seek positions</span>
+        <span class="n">seek_positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
+
+        <span class="c1"># Constructing the results</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">seek_pos</span> <span class="ow">in</span> <span class="n">seek_positions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_pos</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: name not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">results</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_current_variant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reads the current variant.&quot;&quot;&quot;</span>
+        <span class="c1"># Getting the variant&#39;s information</span>
+        <span class="n">var_id</span><span class="p">,</span> <span class="n">rs_id</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">alleles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_curr_variant_info</span><span class="p">()</span>
+
+        <span class="c1"># Getting the variant&#39;s dosage</span>
+        <span class="n">dosage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_curr_variant_dosage</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">_Variant</span><span class="p">(</span><span class="n">rs_id</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="o">*</span><span class="n">alleles</span><span class="p">),</span> <span class="n">dosage</span>
+
+    <span class="k">def</span> <span class="nf">_get_curr_variant_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets the current variant&#39;s information.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: invalid BGEN file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Reading the variant id</span>
+        <span class="n">var_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;H&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">2</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+        <span class="c1"># Reading the variant rsid</span>
+        <span class="n">rs_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;H&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">2</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+        <span class="c1"># Reading the chromosome</span>
+        <span class="n">chrom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;H&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">2</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+        <span class="c1"># Reading the position</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Getting the number of alleles</span>
+        <span class="n">nb_alleles</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">nb_alleles</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;H&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">2</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Getting the alleles</span>
+        <span class="n">alleles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_alleles</span><span class="p">):</span>
+            <span class="n">alleles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+                <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">var_id</span><span class="p">,</span> <span class="n">rs_id</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">alleles</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_curr_variant_dosage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets the current variant&#39;s dosage.&quot;&quot;&quot;</span>
+        <span class="n">dosage</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_compressed</span><span class="p">:</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># Getting the probabilities</span>
+            <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_decompress</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">c</span><span class="p">)),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;u2&quot;</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="mi">32768</span>
+            <span class="n">probs</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+            <span class="c1"># Computing the dosage</span>
+            <span class="n">dosage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout_1_probs_to_dosage</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># The total length C of the rest of the data for this variant</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># The number of bytes to read</span>
+            <span class="n">to_read</span> <span class="o">=</span> <span class="n">c</span>
+
+            <span class="c1"># D = C if no compression</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">c</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_compressed</span><span class="p">:</span>
+                <span class="c1"># The total length D of the probability data after</span>
+                <span class="c1"># decompression</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">to_read</span> <span class="o">=</span> <span class="n">c</span> <span class="o">-</span> <span class="mi">4</span>
+
+            <span class="c1"># Reading the data and checking</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decompress</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">to_read</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">d</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: invalid BGEN file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Checking the number of samples</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">[:</span><span class="mi">4</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: invalid BGEN file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+
+            <span class="c1"># Checking the number of alleles (we only accept 2 alleles)</span>
+            <span class="n">nb_alleles</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;H&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">[:</span><span class="mi">2</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">nb_alleles</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: only two alleles are &quot;</span>
+                    <span class="s2">&quot;supported&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+
+            <span class="c1"># TODO: Check ploidy for sexual chromosomes</span>
+            <span class="c1"># The minimum and maximum for ploidy (we only accept ploidy of 2)</span>
+            <span class="n">min_ploidy</span> <span class="o">=</span> <span class="n">_byte_to_int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">max_ploidy</span> <span class="o">=</span> <span class="n">_byte_to_int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">min_ploidy</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">max_ploidy</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: only accepting ploidy of &quot;</span>
+                    <span class="s2">&quot;2&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+
+            <span class="c1"># Check the list of N bytes for missingness (since we assume only</span>
+            <span class="c1"># diploid values for each sample)</span>
+            <span class="n">ploidy_info</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+            <span class="n">ploidy_info</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unpackbits</span><span class="p">(</span>
+                <span class="n">ploidy_info</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ploidy_info</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">missing_data</span> <span class="o">=</span> <span class="n">ploidy_info</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">:]</span>
+
+            <span class="c1"># TODO: Permit phased data</span>
+            <span class="c1"># Is the data phased?</span>
+            <span class="n">is_phased</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">is_phased</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: only accepting unphased &quot;</span>
+                    <span class="s2">&quot;data&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="c1"># The number of bits used to encode each probabilities</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">_byte_to_int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="c1"># Reading the probabilities (don&#39;t forget we allow only for diploid</span>
+            <span class="c1"># values)</span>
+            <span class="c1"># TODO: Check that len(data) * 8 / b / 2 = nb_samples</span>
+            <span class="n">probs</span> <span class="o">=</span> <span class="n">_pack_bits</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">b</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">probs</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+            <span class="c1"># Computing the dosage</span>
+            <span class="n">dosage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout_2_probs_to_dosage</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span>
+
+            <span class="c1"># Setting the missing to NaN</span>
+            <span class="n">dosage</span><span class="p">[</span><span class="n">missing_data</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="k">return</span> <span class="n">dosage</span>
+
+    <span class="k">def</span> <span class="nf">_layout_1_probs_to_dosage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">probs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms probability values to dosage (from layout 1)&quot;&quot;&quot;</span>
+        <span class="c1"># Constructing the dosage</span>
+        <span class="n">dosage</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">probs</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">probs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prob_t</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">dosage</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">probs</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prob_t</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="k">return</span> <span class="n">dosage</span>
+
+    <span class="k">def</span> <span class="nf">_layout_2_probs_to_dosage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">probs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms probability values to dosage (from layout 2).&quot;&quot;&quot;</span>
+        <span class="c1"># Computing the last genotype&#39;s probabilities</span>
+        <span class="n">last_probs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Constructing the dosage</span>
+        <span class="n">dosage</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">last_probs</span> <span class="o">+</span> <span class="n">probs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Setting low quality to NaN</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prob_t</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">good_probs</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">probs</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prob_t</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span>
+                <span class="p">(</span><span class="n">last_probs</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prob_t</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">dosage</span><span class="p">[</span><span class="o">~</span><span class="n">good_probs</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="k">return</span> <span class="n">dosage</span>
+
+    <span class="k">def</span> <span class="nf">_parse_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parses the header (header and sample blocks).&quot;&quot;&quot;</span>
+        <span class="c1"># Parsing the header block</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header_block</span><span class="p">()</span>
+
+        <span class="c1"># Parsing the sample block (if any)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_sample</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parse_sample_block</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_parse_header_block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parses the header block.&quot;&quot;&quot;</span>
+        <span class="c1"># Getting the data offset (the start point of the data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Getting the header size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_header_size</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Getting the number of samples and variants</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nb_variants</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Checking the magic number</span>
+        <span class="n">magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">magic</span> <span class="o">!=</span> <span class="sa">b</span><span class="s2">&quot;bgen&quot;</span><span class="p">:</span>
+            <span class="c1"># The magic number might be 0, then</span>
+            <span class="k">if</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="n">magic</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: invalid BGEN file.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Passing through the &quot;free data area&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_header_size</span> <span class="o">-</span> <span class="mi">20</span><span class="p">)</span>
+
+        <span class="c1"># Reading the flag</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unpackbits</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Getting the compression type from the layout</span>
+        <span class="n">compression</span> <span class="o">=</span> <span class="n">_bits_to_int</span><span class="p">(</span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">:])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_compressed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">compression</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># No decompression required</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_decompress</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_decompress</span>
+
+        <span class="k">elif</span> <span class="n">compression</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># ZLIB decompression</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_decompress</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">decompress</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_compressed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">elif</span> <span class="n">compression</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">HAS_ZSTD</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;zstandard module is not installed&quot;</span><span class="p">)</span>
+
+            <span class="c1"># ZSTANDARD decompression (needs to be check)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_decompress</span> <span class="o">=</span> <span class="n">zstd</span><span class="o">.</span><span class="n">ZstdDecompressor</span><span class="p">()</span><span class="o">.</span><span class="n">decompress</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_compressed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Getting the layout</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">_bits_to_int</span><span class="p">(</span><span class="n">flag</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">layout</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: invalid BGEN file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">layout</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">layout</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2"> invalid layout type&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">layout</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Checking if samples are in the file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_has_sample</span> <span class="o">=</span> <span class="n">flag</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_parse_sample_block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parses the sample block.&quot;&quot;&quot;</span>
+        <span class="c1"># Getting the block size</span>
+        <span class="n">block_size</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">block_size</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_size</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: invalid BGEN file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Checking the number of samples</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: invalid BGEN file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Getting the sample information</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span><span class="p">):</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;H&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">2</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+
+        <span class="c1"># Just a check with the header</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: number of samples different between header &quot;</span>
+                             <span class="s2">&quot;and sample block&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_connect_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Connect to the index (which is an SQLITE database).&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_db</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.bgi&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_db</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="c1"># Checking the number of markers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(DISTINCT rsid) FROM Variant&quot;</span><span class="p">)</span>
+        <span class="n">nb_markers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">nb_markers</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_variants</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: number of markers different between header &quot;</span>
+                             <span class="s2">&quot;and index file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_no_decompress</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<span class="k">def</span> <span class="nf">_bits_to_int</span><span class="p">(</span><span class="n">bits</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts bits to int.&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="n">bits</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">result</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">bit</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">_byte_to_int_python3</span><span class="p">(</span><span class="n">byte</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a byte to a int for python 3.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">byte</span>
+
+
+<span class="k">def</span> <span class="nf">_byte_to_int_python2</span><span class="p">(</span><span class="n">byte</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a byte to a int for python 2.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;B&quot;</span><span class="p">,</span> <span class="n">byte</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="n">_byte_to_int</span> <span class="o">=</span> <span class="n">_byte_to_int_python3</span>
+<span class="k">if</span> <span class="n">PYTHON_VERSION</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+    <span class="n">_byte_to_int</span> <span class="o">=</span> <span class="n">_byte_to_int_python2</span>
+
+
+<span class="k">def</span> <span class="nf">_pack_bits</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Unpacks BGEN probabilities (as bits).&quot;&quot;&quot;</span>
+    <span class="c1"># Getting the data from the bytes</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">_byte_to_int</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">)),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+    <span class="c1"># Finding the closest full bytes (if required)</span>
+    <span class="c1"># TODO: Improve this so that it is more efficient</span>
+    <span class="n">full_bytes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">nb_bits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="n">b</span> <span class="o">/</span> <span class="mi">8</span><span class="p">))</span> <span class="o">*</span> <span class="mi">8</span>
+        <span class="n">full_bytes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nb_bits</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">full_bytes</span><span class="p">[:,</span> <span class="o">-</span><span class="n">b</span><span class="p">:]</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Packing the bits</span>
+    <span class="n">packed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">packbits</span><span class="p">(</span><span class="n">full_bytes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Left-shifting for final value</span>
+    <span class="n">final</span> <span class="o">=</span> <span class="n">packed</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">packed</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">final</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">left_shift</span><span class="p">(</span><span class="n">final</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint</span><span class="p">)</span> <span class="o">|</span> <span class="n">packed</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">final</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2017, Louis-Philippe Lemieux Perreault.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
