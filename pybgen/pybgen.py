@@ -242,6 +242,31 @@ class PyBGEN(object):
         # Return itself (the generator)
         return self
 
+    def iter_variants_in_region(self, chrom, start, end):
+        """Iterates over variants in a specific region.
+
+        Args:
+            chrom (str): The name of the chromosome.
+            start (int): The starting position of the region.
+            end (int): The ending position of the region.
+
+        """
+        # Getting the region from the index file
+        self._bgen_index.execute(
+            "SELECT file_start_position "
+            "FROM Variant "
+            "WHERE chromosome = ? AND position >= ? AND position <= ?",
+            (chrom, start, end),
+        )
+
+        # Fetching all the seek positions
+        seek_positions = [_[0] for _ in self._bgen_index.fetchall()]
+
+        # Fetching seek positions, we return the variant
+        for seek_pos in seek_positions:
+            self._bgen.seek(seek_pos)
+            yield self._read_current_variant()
+
     def iter_variant_info(self):
         """Iterate over marker information."""
         self._bgen_index.execute(
