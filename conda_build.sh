@@ -7,15 +7,8 @@ if [ -z $pybgen_version ]; then
     exit 1
 fi
 
-# Getting the version of python we want to build for
-python_version=$2
-if [ -z $python_version ]; then
-    (>&2 echo "usage: $0 VERSION PYTHON_VERSION")
-    exit 1
-fi
-
-# Creating a directory for the build module
-mkdir -p conda_dist
+# Creating a directory for the build module (with noarch)
+mkdir -p conda_dist/noarch
 
 # Creating a directory for the skeleton
 mkdir -p skeleton
@@ -31,16 +24,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # The different python versions build
-other_opts=""
-if [ "$python_version" == "2" ]; then
-    python_versions="2.7"
-    other_opts="--numpy=1.13"
-elif [ "$python_version" == "3" ]; then
-    python_versions="3.4 3.5 3.6"
-else
-    (>&2 echo "$python_version: invalid Python version")
-    exit 1
-fi
+python_versions="2.7 3.4 3.5 3.6"
 
 # The different build platforms
 platforms="all"
@@ -48,7 +32,7 @@ platforms="all"
 # Building
 for python_build_version in $python_versions; do
     # Building
-    conda build $other_opts --python $python_build_version pybgen &> log.txt
+    conda build --numpy=1.13 --python $python_build_version pybgen &> log.txt
 
     # Checking the build was completed
     if [ $? -ne 0 ]; then
@@ -68,12 +52,25 @@ for python_build_version in $python_versions; do
 
     # Converting to the different platforms
     for platform in $platforms; do
-        conda convert -p $platform $filename -o ../conda_dist
+        conda convert -p $platform $filename -o ../conda_dist &> build_log.txt
 
         # Checking the conversion was completed
         if [ $? -ne 0 ]; then
             (>&2 echo "Problem converting pybgen $pybgen_version (python $python_build_version) to $platform")
             exit 1
+        fi
+
+        # Checking if a conversion was skipped due to same platform
+        if egrep --quiet Skipping build_log.txt; then
+            # Finding which platform was skipped
+            missing=$(
+                egrep Skipping build_log.txt |
+                egrep -o "'([[:alnum:]]+-[[:digit:]]+)'" |
+                uniq |
+                sed -e "s/'//g"
+            )
+            mkdir -p ../conda_dist/$missing
+            cp $filename ../conda_dist/$missing
         fi
 
     done
@@ -90,3 +87,7 @@ rm -rf skeleton
 pushd conda_dist
 conda index *
 popd
+
+# Permissions
+find conda_dist -type d -print0 | xargs -0 chmod 755
+find conda_dist -type f -print0 | xargs -0 chmod 644
