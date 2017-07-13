@@ -604,11 +604,15 @@ class PyBGEN(object):
         self._bgen_index = self._bgen_db.cursor()
 
         # Checking the number of markers
-        self._bgen_index.execute("SELECT COUNT(DISTINCT rsid) FROM Variant")
+        self._bgen_index.execute("SELECT COUNT (rsid) FROM Variant")
         nb_markers = self._bgen_index.fetchone()[0]
         if nb_markers != self._nb_variants:
-            raise ValueError("{}: number of markers different between header "
-                             "and index file".format(self._bgen.name))
+            raise ValueError(
+                "{}: number of markers different between header ({:,d}) "
+                "and index file ({:,d})".format(
+                    self._bgen.name, self._nb_variants, nb_markers,
+                )
+            )
 
     @staticmethod
     def _no_decompress(data):
