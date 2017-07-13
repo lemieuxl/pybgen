@@ -41,6 +41,12 @@ import numpy as np
 from six.moves import range
 
 try:
+    from struct import iter_unpack
+    HAS_ITER_UNPACK = True
+except ImportError:
+    HAS_ITER_UNPACK = False
+
+try:
     import zstd
     HAS_ZSTD = True
 except ImportError:
@@ -456,8 +462,27 @@ class PyBGEN(object):
 
             # Reading the probabilities (don't forget we allow only for diploid
             # values)
-            # TODO: Check that len(data) * 8 / b / 2 = nb_samples
-            probs = _pack_bits(data, b) / (2**b - 1)
+            probs = None
+            if HAS_ITER_UNPACK and b == 8:
+                probs = np.fromiter(
+                    (_[0] for _ in iter_unpack("<B", data)),
+                    dtype=np.uint,
+                ) / (2**b - 1)
+
+            elif HAS_ITER_UNPACK and b == 16:
+                probs = np.fromiter(
+                    (_[0] for _ in iter_unpack("<H", data)),
+                    dtype=np.uint,
+                ) / (2**b - 1)
+
+            elif HAS_ITER_UNPACK and b == 32:
+                probs = np.fromiter(
+                    (_[0] for _ in iter_unpack("<L", data)),
+                    dtype=np.uint,
+                ) / (2**b - 1)
+
+            else:
+                probs = _pack_bits(data, b) / (2**b - 1)
             probs.shape = (self._nb_samples, 2)
 
             # Computing the dosage
