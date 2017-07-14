@@ -40,6 +40,8 @@ import numpy as np
 
 from six.moves import range
 
+import c_test
+
 try:
     import zstd
     HAS_ZSTD = True
@@ -453,7 +455,8 @@ class PyBGEN(object):
             # values)
             probs = None
             if b == 8:
-                probs = np.fromstring(data, dtype=np.uint8)
+                # probs = np.fromstring(data, dtype=np.uint8)
+                probs = c_test.test_function(data, b, self._nb_samples * 2)
 
             elif b == 16:
                 probs = np.fromstring(data, dtype=np.uint16)

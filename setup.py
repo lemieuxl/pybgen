@@ -11,13 +11,19 @@
 
 
 import os
-from setuptools import setup
+from setuptools import setup, Extension
+
+import numpy as np
 
 
 MAJOR = 0
-MINOR = 2
+MINOR = 3
 MICRO = 0
 VERSION = "{}.{}.{}".format(MAJOR, MINOR, MICRO)
+
+
+module = Extension("c_test", sources=["src/test.c"])
+include = np.get_include()
 
 
 def write_version_file(fn=None):
@@ -75,6 +81,8 @@ def setup_package():
                      "License :: OSI Approved :: MIT License",
                      "Topic :: Scientific/Engineering :: Bio-Informatics"],
         keywords="bioinformatics format BGEN binary",
+        ext_modules=[module],
+        include_dirs=[include],
     )
 
     return
