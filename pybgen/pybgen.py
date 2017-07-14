@@ -121,8 +121,9 @@ class PyBGEN(object):
             # The probability
             self.prob_t = prob_t
 
-            # Where we're at in the file
+            # Seeking to the first variant of the file
             self._n = 0
+            self._bgen.seek(self._first_variant_block)
 
         elif self._mode == "w":
             raise NotImplemented("'w' mode not yet implemented")
@@ -230,14 +231,8 @@ class PyBGEN(object):
         if self._mode != "r":
             raise UnsupportedOperation("not available in 'w' mode")
 
-        # Seeking back at the beginning of the file
-        self._bgen_index.execute(
-            "SELECT file_start_position "
-            "FROM Variant "
-            "ORDER BY file_start_position "
-            "LIMIT 1",
-        )
-        self._bgen.seek(self._bgen_index.fetchone()[0])
+        # Seeking back to the first variant block
+        self._bgen.seek(self._first_variant_block)
 
         # Return itself (the generator)
         return self
@@ -518,6 +513,7 @@ class PyBGEN(object):
         """Parses the header block."""
         # Getting the data offset (the start point of the data
         self._offset = unpack("<I", self._bgen.read(4))[0]
+        self._first_variant_block = self._offset + 4
 
         # Getting the header size
         self._header_size = unpack("<I", self._bgen.read(4))[0]
