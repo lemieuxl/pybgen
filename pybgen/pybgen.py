@@ -41,12 +41,6 @@ import numpy as np
 from six.moves import range
 
 try:
-    from struct import iter_unpack
-    HAS_ITER_UNPACK = True
-except ImportError:
-    HAS_ITER_UNPACK = False
-
-try:
     import zstd
     HAS_ZSTD = True
 except ImportError:
@@ -127,8 +121,9 @@ class PyBGEN(object):
             # The probability
             self.prob_t = prob_t
 
-            # Where we're at in the file
+            # Seeking to the first variant of the file
             self._n = 0
+            self._bgen.seek(self._first_variant_block)
 
         elif self._mode == "w":
             raise NotImplemented("'w' mode not yet implemented")
@@ -236,14 +231,8 @@ class PyBGEN(object):
         if self._mode != "r":
             raise UnsupportedOperation("not available in 'w' mode")
 
-        # Seeking back at the beginning of the file
-        self._bgen_index.execute(
-            "SELECT file_start_position "
-            "FROM Variant "
-            "ORDER BY file_start_position "
-            "LIMIT 1",
-        )
-        self._bgen.seek(self._bgen_index.fetchone()[0])
+        # Seeking back to the first variant block
+        self._bgen.seek(self._first_variant_block)
 
         # Return itself (the generator)
         return self
@@ -463,30 +452,21 @@ class PyBGEN(object):
             # Reading the probabilities (don't forget we allow only for diploid
             # values)
             probs = None
-            if HAS_ITER_UNPACK and b == 8:
-                probs = np.fromiter(
-                    (_[0] for _ in iter_unpack("<B", data)),
-                    dtype=np.uint,
-                ) / (2**b - 1)
+            if b == 8:
+                probs = np.fromstring(data, dtype=np.uint8)
 
-            elif HAS_ITER_UNPACK and b == 16:
-                probs = np.fromiter(
-                    (_[0] for _ in iter_unpack("<H", data)),
-                    dtype=np.uint,
-                ) / (2**b - 1)
+            elif b == 16:
+                probs = np.fromstring(data, dtype=np.uint16)
 
-            elif HAS_ITER_UNPACK and b == 32:
-                probs = np.fromiter(
-                    (_[0] for _ in iter_unpack("<L", data)),
-                    dtype=np.uint,
-                ) / (2**b - 1)
+            elif b == 32:
+                probs = np.fromstring(data, dtype=np.uint32)
 
             else:
-                probs = _pack_bits(data, b) / (2**b - 1)
-            probs.shape = (self._nb_samples, 2)
+                probs = _pack_bits(data, b)
 
-            # Computing the dosage
-            dosage = self._layout_2_probs_to_dosage(probs)
+            # Changing shape and computing dosage
+            probs.shape = (self._nb_samples, 2)
+            dosage = self._layout_2_probs_to_dosage(probs / (2**b - 1))
 
             # Setting the missing to NaN
             dosage[missing_data] = np.nan
@@ -533,6 +513,7 @@ class PyBGEN(object):
         """Parses the header block."""
         # Getting the data offset (the start point of the data
         self._offset = unpack("<I", self._bgen.read(4))[0]
+        self._first_variant_block = self._offset + 4
 
         # Getting the header size
         self._header_size = unpack("<I", self._bgen.read(4))[0]
