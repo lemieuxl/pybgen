@@ -188,6 +188,28 @@ class ReaderTests(unittest.TestCase):
         # Checking if we checked all variants
         self.assertEqual(seen_variants, self.truths["variant_set"])
 
+    def test_as_iterator(self):
+        """Tests the module as iterator."""
+        seen_variants = set()
+        for variant, dosage in self.bgen:
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.truths["variants"][name]["variant"],
+                variant,
+            )
+
+            # Comparing the dosage
+            np.testing.assert_array_almost_equal(
+                self.truths["variants"][name]["dosage"], dosage,
+            )
+
+        # Checking if we checked all variants
+        self.assertEqual(seen_variants, self.truths["variant_set"])
+
     def test_iter_variant_info(self):
         """Tests the iteration of all variants' information."""
         seen_variants = set()
