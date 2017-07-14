@@ -204,8 +204,9 @@
             <span class="c1"># The probability</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prob_t</span> <span class="o">=</span> <span class="n">prob_t</span>
 
-            <span class="c1"># Where we&#39;re at in the file</span>
+            <span class="c1"># Seeking to the first variant of the file</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_first_variant_block</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s2">&quot;&#39;w&#39; mode not yet implemented&quot;</span><span class="p">)</span>
@@ -313,14 +314,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">!=</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s2">&quot;not available in &#39;w&#39; mode&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Seeking back at the beginning of the file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;SELECT file_start_position &quot;</span>
-            <span class="s2">&quot;FROM Variant &quot;</span>
-            <span class="s2">&quot;ORDER BY file_start_position &quot;</span>
-            <span class="s2">&quot;LIMIT 1&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># Seeking back to the first variant block</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_first_variant_block</span><span class="p">)</span>
 
         <span class="c1"># Return itself (the generator)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -539,12 +534,22 @@
 
             <span class="c1"># Reading the probabilities (don&#39;t forget we allow only for diploid</span>
             <span class="c1"># values)</span>
-            <span class="c1"># TODO: Check that len(data) * 8 / b / 2 = nb_samples</span>
-            <span class="n">probs</span> <span class="o">=</span> <span class="n">_pack_bits</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">b</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">probs</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">probs</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+                <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
 
-            <span class="c1"># Computing the dosage</span>
-            <span class="n">dosage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout_2_probs_to_dosage</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
+                <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">32</span><span class="p">:</span>
+                <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">probs</span> <span class="o">=</span> <span class="n">_pack_bits</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+            <span class="c1"># Changing shape and computing dosage</span>
+            <span class="n">probs</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nb_samples</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">dosage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout_2_probs_to_dosage</span><span class="p">(</span><span class="n">probs</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">b</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
             <span class="c1"># Setting the missing to NaN</span>
             <span class="n">dosage</span><span class="p">[</span><span class="n">missing_data</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -591,6 +596,7 @@
         <span class="sd">&quot;&quot;&quot;Parses the header block.&quot;&quot;&quot;</span>
         <span class="c1"># Getting the data offset (the start point of the data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_first_variant_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">+</span> <span class="mi">4</span>
 
         <span class="c1"># Getting the header size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_header_size</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
@@ -687,11 +693,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_db</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
 
         <span class="c1"># Checking the number of markers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(DISTINCT rsid) FROM Variant&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT (rsid) FROM Variant&quot;</span><span class="p">)</span>
         <span class="n">nb_markers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">nb_markers</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_variants</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: number of markers different between header &quot;</span>
-                             <span class="s2">&quot;and index file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: number of markers different between header (</span><span class="si">{:,d}</span><span class="s2">) &quot;</span>
+                <span class="s2">&quot;and index file (</span><span class="si">{:,d}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_variants</span><span class="p">,</span> <span class="n">nb_markers</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_no_decompress</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
