@@ -121,8 +121,9 @@ class PyBGEN(object):
             # The probability
             self.prob_t = prob_t
 
-            # Where we're at in the file
+            # Seeking to the first variant of the file
             self._n = 0
+            self._bgen.seek(self._first_variant_block)
 
         elif self._mode == "w":
             raise NotImplemented("'w' mode not yet implemented")
@@ -230,17 +231,52 @@ class PyBGEN(object):
         if self._mode != "r":
             raise UnsupportedOperation("not available in 'w' mode")
 
-        # Seeking back at the beginning of the file
-        self._bgen_index.execute(
-            "SELECT file_start_position "
-            "FROM Variant "
-            "ORDER BY file_start_position "
-            "LIMIT 1",
-        )
-        self._bgen.seek(self._bgen_index.fetchone()[0])
+        # Seeking back to the first variant block
+        self._bgen.seek(self._first_variant_block)
 
         # Return itself (the generator)
         return self
+
+    def iter_variants_in_region(self, chrom, start, end):
+        """Iterates over variants in a specific region.
+
+        Args:
+            chrom (str): The name of the chromosome.
+            start (int): The starting position of the region.
+            end (int): The ending position of the region.
+
+        """
+        # Getting the region from the index file
+        self._bgen_index.execute(
+            "SELECT file_start_position "
+            "FROM Variant "
+            "WHERE chromosome = ? AND position >= ? AND position <= ?",
+            (chrom, start, end),
+        )
+
+        # Fetching all the seek positions
+        seek_positions = [_[0] for _ in self._bgen_index.fetchall()]
+
+        # Fetching seek positions, we return the variant
+        for seek_pos in seek_positions:
+            self._bgen.seek(seek_pos)
+            yield self._read_current_variant()
+
+    def iter_variant_info(self):
+        """Iterate over marker information."""
+        self._bgen_index.execute(
+            "SELECT chromosome, position, rsid, allele1, allele2 FROM Variant",
+        )
+
+        # The array size
+        array_size = 1000
+
+        # Fetching the results
+        results = self._bgen_index.fetchmany(array_size)
+        while results:
+            for chrom, pos, rsid, a1, a2 in results:
+                yield _Variant(rsid, chrom, pos, a1, a2)
+            results = self._bgen_index.fetchmany(array_size)
 
     def get_variant(self, name):
         """Gets the values for a given variant.
@@ -415,12 +451,22 @@ class PyBGEN(object):
 
             # Reading the probabilities (don't forget we allow only for diploid
             # values)
-            # TODO: Check that len(data) * 8 / b / 2 = nb_samples
-            probs = _pack_bits(data, b) / (2**b - 1)
-            probs.shape = (self._nb_samples, 2)
+            probs = None
+            if b == 8:
+                probs = np.fromstring(data, dtype=np.uint8)
 
-            # Computing the dosage
-            dosage = self._layout_2_probs_to_dosage(probs)
+            elif b == 16:
+                probs = np.fromstring(data, dtype=np.uint16)
+
+            elif b == 32:
+                probs = np.fromstring(data, dtype=np.uint32)
+
+            else:
+                probs = _pack_bits(data, b)
+
+            # Changing shape and computing dosage
+            probs.shape = (self._nb_samples, 2)
+            dosage = self._layout_2_probs_to_dosage(probs / (2**b - 1))
 
             # Setting the missing to NaN
             dosage[missing_data] = np.nan
@@ -467,6 +513,7 @@ class PyBGEN(object):
         """Parses the header block."""
         # Getting the data offset (the start point of the data
         self._offset = unpack("<I", self._bgen.read(4))[0]
+        self._first_variant_block = self._offset + 4
 
         # Getting the header size
         self._header_size = unpack("<I", self._bgen.read(4))[0]
@@ -563,11 +610,15 @@ class PyBGEN(object):
         self._bgen_index = self._bgen_db.cursor()
 
         # Checking the number of markers
-        self._bgen_index.execute("SELECT COUNT(DISTINCT rsid) FROM Variant")
+        self._bgen_index.execute("SELECT COUNT (rsid) FROM Variant")
         nb_markers = self._bgen_index.fetchone()[0]
         if nb_markers != self._nb_variants:
-            raise ValueError("{}: number of markers different between header "
-                             "and index file".format(self._bgen.name))
+            raise ValueError(
+                "{}: number of markers different between header ({:,d}) "
+                "and index file ({:,d})".format(
+                    self._bgen.name, self._nb_variants, nb_markers,
+                )
+            )
 
     @staticmethod
     def _no_decompress(data):
