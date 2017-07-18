@@ -122,7 +122,6 @@ class PyBGEN(object):
             self.prob_t = prob_t
 
             # Seeking to the first variant of the file
-            self._n = 0
             self._bgen.seek(self._first_variant_block)
 
         elif self._mode == "w":
@@ -215,8 +214,7 @@ class PyBGEN(object):
         if self._mode != "r":
             raise UnsupportedOperation("not available in 'w' mode")
 
-        self._n += 1
-        if self._n > self._nb_variants:
+        if self._bgen.tell() > self._last_variant_block:
             raise StopIteration()
 
         return self._read_current_variant()
@@ -609,9 +607,19 @@ class PyBGEN(object):
         self._bgen_db = sqlite3.connect(self._bgen.name + ".bgi")
         self._bgen_index = self._bgen_db.cursor()
 
+        # Fetching the number of variants and the first and last seek position
+        self._bgen_index.execute(
+            "SELECT COUNT (rsid), "
+            "       MIN (file_start_position), "
+            "       MAX (file_start_position) "
+            "FROM Variant"
+        )
+        result = self._bgen_index.fetchone()
+        nb_markers = result[0]
+        first_variant_block = result[1]
+        self._last_variant_block = result[2]
+
         # Checking the number of markers
-        self._bgen_index.execute("SELECT COUNT (rsid) FROM Variant")
-        nb_markers = self._bgen_index.fetchone()[0]
         if nb_markers != self._nb_variants:
             raise ValueError(
                 "{}: number of markers different between header ({:,d}) "
@@ -619,6 +627,10 @@ class PyBGEN(object):
                     self._bgen.name, self._nb_variants, nb_markers,
                 )
             )
+
+        # Checking the first variant seek position
+        if first_variant_block != self._first_variant_block:
+            raise ValueError("{}: invalid index".format(self._bgen.name))
 
     @staticmethod
     def _no_decompress(data):
