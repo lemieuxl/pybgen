@@ -17,29 +17,34 @@ void swapPtr(uint32_t* x)
 
 void unpack_values(const char* data, int b, int total_nb_values, unsigned int *out) {
 
-    int cs = 0;          // current size
-    uint32_t cb = 0;     // current bits
-    int i = 0;           // index in byte array
-    int nb_values = 0;   // Number of values returned
-    uint32_t value;
-
+    int nb_values = 0;
     while (nb_values < total_nb_values) {
-        if (cs < b) {
-            // Getting another byte
-            cb = (cb << 8) ^ (data[i] & 0xFF);
-            cs += 8;
-            i += 1;
-        }
-        else {
-            cs -= b;
-            value = (cb >> cs) << (32 - b);
-            cb ^= value << cs;
-            swapPtr(&value);
-            out[nb_values] = value;
-            nb_values += 1;
-        }
+        out[nb_values] = (uint8_t) data[nb_values];
+        nb_values += 1;
     }
 
+//    int cs = 0;          // current size
+//    uint32_t cb = 0;     // current bits
+//    int i = 0;           // index in byte array
+//    int nb_values = 0;   // Number of values returned
+//    uint32_t value;
+//
+//    while (nb_values < total_nb_values) {
+//        if (cs < b) {
+//            // Getting another byte
+//            cb = (cb << 8) ^ (data[i] & 0xFF);
+//            cs += 8;
+//            i += 1;
+//        }
+//        else {
+//            cs -= b;
+//            value = (cb >> cs) << (32 - b);
+//            cb ^= value << cs;
+//            swapPtr(&value);
+//            out[nb_values] = value;
+//            nb_values += 1;
+//        }
+//    }
 
 }
 
