@@ -114,6 +114,7 @@ class PyBGEN(object):
                 self._samples = None
 
             # Connecting to the index
+            self._skip_index = _skip_index
             if not _skip_index:
                 if not os.path.isfile(fn + ".bgi"):
                     raise IOError("{}: no such file".format(fn + ".bgi"))
@@ -165,7 +166,7 @@ class PyBGEN(object):
         self._bgen.close()
 
         # Closing the index file (if in read mode)
-        if self._mode == "r":
+        if self._mode == "r" and not self._skip_index:
             self._bgen_db.close()
 
     @property
