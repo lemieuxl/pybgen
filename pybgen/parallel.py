@@ -87,7 +87,7 @@ class ParallelPyBGEN(PyBGEN):
         self._seeks = None
 
     def iter_variants(self):
-        """Iterates over variants using multiple process."""
+        """Iterates over all variants using multiple process."""
         # Getting tall the variants seek position
         if self._seeks is None:
             self._get_all_seeks()
@@ -96,7 +96,12 @@ class ParallelPyBGEN(PyBGEN):
         return self._parallel_iter_seeks(seeks)
 
     def iter_variants_by_name(self, names):
-        """Iterates over variants using a list of names."""
+        """Iterates over variants using a list of names.
+
+        Args:
+            names (list): A list of names to extract specific variants.
+
+        """
         seeks = self._get_seeks_for_names(names)
         seeks = [seeks[i::self.cpus] for i in range(self.cpus)]
 
