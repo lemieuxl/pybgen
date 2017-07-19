@@ -25,6 +25,7 @@
 
 import os
 import shutil
+import random
 import unittest
 from tempfile import mkdtemp
 
@@ -255,6 +256,35 @@ class ReaderTests(unittest.TestCase):
                 if variant.pos >= 67000 and variant.pos <= 70999:
                     expected.add(name)
         self.assertEqual(seen_variants, expected)
+
+    def test_iter_seeks(self):
+        """Tests the _iter_seeks function."""
+        # Fetching random seeks from the index
+        self.bgen._bgen_index.execute(
+            "SELECT rsid, file_start_position FROM Variant"
+        )
+        seeks = random.sample(self.bgen._bgen_index.fetchall(), 5)
+
+        seen_variants = set()
+        iterator = self.bgen._iter_seeks([_[1] for _ in seeks])
+        for variant, dosage in iterator:
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.truths["variants"][name]["variant"],
+                variant,
+            )
+
+            # Comparing the dosage
+            np.testing.assert_array_almost_equal(
+                self.truths["variants"][name]["dosage"], dosage,
+            )
+
+        # Checking if we checked all variants
+        self.assertEqual(seen_variants, {_[0] for _ in seeks})
 
 
 class Test32bits(ReaderTests):

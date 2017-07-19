@@ -48,7 +48,7 @@ except ImportError:
 
 
 __author__ = "Louis-Philippe Lemieux Perreault"
-__copyright__ = "Copyright 2014 Louis-Philippe Lemieux Perreault"
+__copyright__ = "Copyright 2017 Louis-Philippe Lemieux Perreault"
 __license__ = "MIT"
 
 
@@ -99,7 +99,7 @@ class PyBGEN(object):
 
     """
 
-    def __init__(self, fn, mode="r", prob_t=0.9):
+    def __init__(self, fn, mode="r", prob_t=0.9, _skip_index=False):
         """Initializes a new PyBGEN instance."""
         # The mode
         self._mode = mode
@@ -114,15 +114,16 @@ class PyBGEN(object):
                 self._samples = None
 
             # Connecting to the index
-            if not os.path.isfile(fn + ".bgi"):
-                raise IOError("{}: no such file".format(fn + ".bgi"))
-            self._connect_index()
+            self._skip_index = _skip_index
+            if not _skip_index:
+                if not os.path.isfile(fn + ".bgi"):
+                    raise IOError("{}: no such file".format(fn + ".bgi"))
+                self._connect_index()
 
             # The probability
             self.prob_t = prob_t
 
             # Seeking to the first variant of the file
-            self._n = 0
             self._bgen.seek(self._first_variant_block)
 
         elif self._mode == "w":
@@ -165,7 +166,7 @@ class PyBGEN(object):
         self._bgen.close()
 
         # Closing the index file (if in read mode)
-        if self._mode == "r":
+        if self._mode == "r" and not self._skip_index:
             self._bgen_db.close()
 
     @property
@@ -215,8 +216,7 @@ class PyBGEN(object):
         if self._mode != "r":
             raise UnsupportedOperation("not available in 'w' mode")
 
-        self._n += 1
-        if self._n > self._nb_variants:
+        if self._bgen.tell() > self._last_variant_block:
             raise StopIteration()
 
         return self._read_current_variant()
@@ -277,6 +277,12 @@ class PyBGEN(object):
             for chrom, pos, rsid, a1, a2 in results:
                 yield _Variant(rsid, chrom, pos, a1, a2)
             results = self._bgen_index.fetchmany(array_size)
+
+    def _iter_seeks(self, seeks):
+        """Iterate over seek positions."""
+        for seek in seeks:
+            self._bgen.seek(seek)
+            yield self._read_current_variant()
 
     def get_variant(self, name):
         """Gets the values for a given variant.
@@ -609,9 +615,19 @@ class PyBGEN(object):
         self._bgen_db = sqlite3.connect(self._bgen.name + ".bgi")
         self._bgen_index = self._bgen_db.cursor()
 
+        # Fetching the number of variants and the first and last seek position
+        self._bgen_index.execute(
+            "SELECT COUNT (rsid), "
+            "       MIN (file_start_position), "
+            "       MAX (file_start_position) "
+            "FROM Variant"
+        )
+        result = self._bgen_index.fetchone()
+        nb_markers = result[0]
+        first_variant_block = result[1]
+        self._last_variant_block = result[2]
+
         # Checking the number of markers
-        self._bgen_index.execute("SELECT COUNT (rsid) FROM Variant")
-        nb_markers = self._bgen_index.fetchone()[0]
         if nb_markers != self._nb_variants:
             raise ValueError(
                 "{}: number of markers different between header ({:,d}) "
@@ -619,6 +635,10 @@ class PyBGEN(object):
                     self._bgen.name, self._nb_variants, nb_markers,
                 )
             )
+
+        # Checking the first variant seek position
+        if first_variant_block != self._first_variant_block:
+            raise ValueError("{}: invalid index".format(self._bgen.name))
 
     @staticmethod
     def _no_decompress(data):
