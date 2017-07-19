@@ -93,6 +93,45 @@ class ParallelPyBGEN(PyBGEN):
             self._get_all_seeks()
         seeks = [self._seeks[i::self.cpus] for i in range(self.cpus)]
 
+        return self._parallel_iter_seeks(seeks)
+
+    def iter_variants_by_name(self, names):
+        """Iterates over variants using a list of names."""
+        seeks = self._get_seeks_for_names(names)
+        seeks = [seeks[i::self.cpus] for i in range(self.cpus)]
+
+        return self._parallel_iter_seeks(seeks)
+
+    def _get_all_seeks(self):
+        """Gets the list of seeks."""
+        self._bgen_index.execute("SELECT file_start_position FROM Variant")
+        seeks = [_[0] for _ in self._bgen_index.fetchall()]
+        seeks.sort()
+        self._seeks = tuple(seeks)
+
+    def _get_seeks_for_names(self, names):
+        """Gets the seek values for each names."""
+        self._bgen_index.execute(
+            "SELECT file_start_position "
+            "FROM Variant "
+            "WHERE rsid IN ({})".format(",".join(["?"]*len(names))),
+            tuple(names),
+        )
+        return tuple(_[0] for _ in self._bgen_index.fetchall())
+
+    def _spawn_workers(self, seeks, queue):
+        """Spawn some workers."""
+        self._workers = []
+        for i in range(self.cpus):
+            worker = multiprocessing.Process(
+                target=_pybgen_reader,
+                args=(self._bgen.name, self.prob_t, seeks[i], queue),
+            )
+            self._workers.append(worker)
+            worker.start()
+
+    def _parallel_iter_seeks(self, seeks):
+        """Iterates over variants using multiple process."""
         # Spanning processes
         queue = multiprocessing.Queue(self._max_variants)
         self._spawn_workers(seeks, queue)
@@ -114,21 +153,3 @@ class ParallelPyBGEN(PyBGEN):
             # Terminating the worker, whatever happened
             for worker in self._workers:
                 worker.terminate()
-
-    def _get_all_seeks(self):
-        """Gets the list of seeks."""
-        self._bgen_index.execute("SELECT file_start_position FROM Variant")
-        seeks = [_[0] for _ in self._bgen_index.fetchall()]
-        seeks.sort()
-        self._seeks = tuple(seeks)
-
-    def _spawn_workers(self, seeks, queue):
-        """Spawn some workers."""
-        self._workers = []
-        for i in range(self.cpus):
-            worker = multiprocessing.Process(
-                target=_pybgen_reader,
-                args=(self._bgen.name, self.prob_t, seeks[i], queue),
-            )
-            self._workers.append(worker)
-            worker.start()
