@@ -48,7 +48,7 @@ except ImportError:
 
 
 __author__ = "Louis-Philippe Lemieux Perreault"
-__copyright__ = "Copyright 2014 Louis-Philippe Lemieux Perreault"
+__copyright__ = "Copyright 2017 Louis-Philippe Lemieux Perreault"
 __license__ = "MIT"
 
 
@@ -99,7 +99,7 @@ class PyBGEN(object):
 
     """
 
-    def __init__(self, fn, mode="r", prob_t=0.9):
+    def __init__(self, fn, mode="r", prob_t=0.9, _skip_index=False):
         """Initializes a new PyBGEN instance."""
         # The mode
         self._mode = mode
@@ -114,9 +114,11 @@ class PyBGEN(object):
                 self._samples = None
 
             # Connecting to the index
-            if not os.path.isfile(fn + ".bgi"):
-                raise IOError("{}: no such file".format(fn + ".bgi"))
-            self._connect_index()
+            self._skip_index = _skip_index
+            if not _skip_index:
+                if not os.path.isfile(fn + ".bgi"):
+                    raise IOError("{}: no such file".format(fn + ".bgi"))
+                self._connect_index()
 
             # The probability
             self.prob_t = prob_t
@@ -164,7 +166,7 @@ class PyBGEN(object):
         self._bgen.close()
 
         # Closing the index file (if in read mode)
-        if self._mode == "r":
+        if self._mode == "r" and not self._skip_index:
             self._bgen_db.close()
 
     @property
@@ -275,6 +277,12 @@ class PyBGEN(object):
             for chrom, pos, rsid, a1, a2 in results:
                 yield _Variant(rsid, chrom, pos, a1, a2)
             results = self._bgen_index.fetchmany(array_size)
+
+    def _iter_seeks(self, seeks):
+        """Iterate over seek positions."""
+        for seek in seeks:
+            self._bgen.seek(seek)
+            yield self._read_current_variant()
 
     def get_variant(self, name):
         """Gets the values for a given variant.
