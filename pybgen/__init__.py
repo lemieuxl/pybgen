@@ -26,7 +26,7 @@
 
 
 from .pybgen import PyBGEN
-from .parallel_pybgen import ParallelPyBGEN
+from .parallel import ParallelPyBGEN
 
 try:
     from .version import pybgen_version as __version__
