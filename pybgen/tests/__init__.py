@@ -26,6 +26,7 @@
 import unittest
 
 from .test_pybgen import reader_tests
+from .test_parallel import parallel_reader_tests
 
 
 __author__ = "Louis-Philippe Lemieux Perreault"
@@ -36,6 +37,10 @@ __license__ = "MIT"
 # test_suite = unittest.defaultTestLoader.discover(__name__)
 test_suite = unittest.TestSuite()
 for test_case in reader_tests:
+    test_suite.addTests(
+        unittest.TestLoader().loadTestsFromTestCase(test_case),
+    )
+for test_case in parallel_reader_tests:
     test_suite.addTests(
         unittest.TestLoader().loadTestsFromTestCase(test_case),
     )
