@@ -27,9 +27,10 @@
 
 from __future__ import division
 
+import logging
 import multiprocessing
 
-import logging
+from six.moves import range
 
 from .pybgen import PyBGEN
 
