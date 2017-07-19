@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pybgen.pybgen &#8212; pybgen 0.1.0 documentation</title>
+    <title>pybgen.pybgen &#8212; pybgen 0.3.0 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.1.0',
+        VERSION:     '0.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -131,7 +131,7 @@
 
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Louis-Philippe Lemieux Perreault&quot;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2014 Louis-Philippe Lemieux Perreault&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2017 Louis-Philippe Lemieux Perreault&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;MIT&quot;</span>
 
 
@@ -182,7 +182,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">prob_t</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">prob_t</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">_skip_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initializes a new PyBGEN instance.&quot;&quot;&quot;</span>
         <span class="c1"># The mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">=</span> <span class="n">mode</span>
@@ -197,15 +197,16 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="c1"># Connecting to the index</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fn</span> <span class="o">+</span> <span class="s2">&quot;.bgi&quot;</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: no such file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fn</span> <span class="o">+</span> <span class="s2">&quot;.bgi&quot;</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_connect_index</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_skip_index</span> <span class="o">=</span> <span class="n">_skip_index</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_skip_index</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fn</span> <span class="o">+</span> <span class="s2">&quot;.bgi&quot;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: no such file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fn</span> <span class="o">+</span> <span class="s2">&quot;.bgi&quot;</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_connect_index</span><span class="p">()</span>
 
             <span class="c1"># The probability</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prob_t</span> <span class="o">=</span> <span class="n">prob_t</span>
 
             <span class="c1"># Seeking to the first variant of the file</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_first_variant_block</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span>
@@ -248,7 +249,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="c1"># Closing the index file (if in read mode)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_index</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
     <span class="nd">@property</span>
@@ -298,8 +299,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">!=</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s2">&quot;not available in &#39;w&#39; mode&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_variants</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_variant_block</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">()</span></div>
@@ -360,6 +360,12 @@
             <span class="k">for</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">rsid</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">_Variant</span><span class="p">(</span><span class="n">rsid</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
             <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchmany</span><span class="p">(</span><span class="n">array_size</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_iter_seeks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seeks</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterate over seek positions.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">seek</span> <span class="ow">in</span> <span class="n">seeks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">()</span>
 
 <div class="viewcode-block" id="PyBGEN.get_variant"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.get_variant">[docs]</a>    <span class="k">def</span> <span class="nf">get_variant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Gets the values for a given variant.</span>
@@ -692,9 +698,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_db</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.bgi&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_db</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
 
+        <span class="c1"># Fetching the number of variants and the first and last seek position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT COUNT (rsid), &quot;</span>
+            <span class="s2">&quot;       MIN (file_start_position), &quot;</span>
+            <span class="s2">&quot;       MAX (file_start_position) &quot;</span>
+            <span class="s2">&quot;FROM Variant&quot;</span>
+        <span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="n">nb_markers</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">first_variant_block</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_variant_block</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
         <span class="c1"># Checking the number of markers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT (rsid) FROM Variant&quot;</span><span class="p">)</span>
-        <span class="n">nb_markers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">nb_markers</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_variants</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: number of markers different between header (</span><span class="si">{:,d}</span><span class="s2">) &quot;</span>
@@ -702,6 +718,10 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nb_variants</span><span class="p">,</span> <span class="n">nb_markers</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
+
+        <span class="c1"># Checking the first variant seek position</span>
+        <span class="k">if</span> <span class="n">first_variant_block</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_variant_block</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: invalid index&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_no_decompress</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>

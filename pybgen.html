@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pybgen’s API &#8212; pybgen 0.1.0 documentation</title>
+    <title>pybgen’s API &#8212; pybgen 0.3.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0',
+        VERSION:     '0.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -51,7 +51,11 @@
 <h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">pybgen’s API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pybgen’s API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main-pybgen-class">Main PyBGEN class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parallel-pybgen-class">Parallel PyBGEN class</a></li>
+</ul>
+</li>
 </ul>
 
 <div class="relations">
@@ -80,9 +84,11 @@
             
   <div class="section" id="pybgen-s-api">
 <h1>pybgen’s API<a class="headerlink" href="#pybgen-s-api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="main-pybgen-class">
+<h2>Main PyBGEN class<a class="headerlink" href="#main-pybgen-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pybgen.PyBGEN">
-<em class="property">class </em><code class="descclassname">pybgen.</code><code class="descname">PyBGEN</code><span class="sig-paren">(</span><em>fn</em>, <em>mode='r'</em>, <em>prob_t=0.9</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pybgen.</code><code class="descname">PyBGEN</code><span class="sig-paren">(</span><em>fn</em>, <em>mode='r'</em>, <em>prob_t=0.9</em>, <em>_skip_index=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads and store a set of BGEN files.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -255,6 +261,60 @@ has more than one item if there are duplicated variants.</td>
 information about the tests.</p>
 </dd></dl>
 
+</div>
+<div class="section" id="parallel-pybgen-class">
+<h2>Parallel PyBGEN class<a class="headerlink" href="#parallel-pybgen-class" title="Permalink to this headline">¶</a></h2>
+<p>We provide a wrapper class called <a class="reference internal" href="#pybgen.ParallelPyBGEN" title="pybgen.ParallelPyBGEN"><code class="xref py py-class docutils literal"><span class="pre">ParallelPyBGEN</span></code></a> which implements
+two functions to iterate over variants in parallel.</p>
+<dl class="class">
+<dt id="pybgen.ParallelPyBGEN">
+<em class="property">class </em><code class="descclassname">pybgen.</code><code class="descname">ParallelPyBGEN</code><span class="sig-paren">(</span><em>fn</em>, <em>prob_t=0.9</em>, <em>cpus=2</em>, <em>max_variants=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads BGEN files in parallel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The name of the BGEN file.</li>
+<li><strong>prob_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – The probability threshold (optional).</li>
+<li><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The number of CPUs (default is 2).</li>
+<li><strong>max_variants</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The maximal number of variants in the Queue</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Reads a BGEN file using multiple processes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pybgen</span> <span class="kn">import</span> <span class="n">ParrallelPyBGEN</span> <span class="k">as</span> <span class="n">PyBGEN</span>
+
+<span class="c1"># Reading a BGEN file</span>
+<span class="k">with</span> <span class="n">PyBGEN</span><span class="p">(</span><span class="s2">&quot;bgen_file_name&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">bgen</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="pybgen.ParallelPyBGEN.iter_variants">
+<code class="descname">iter_variants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN.iter_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN.iter_variants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates over all variants using multiple process.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybgen.ParallelPyBGEN.iter_variants_by_name">
+<code class="descname">iter_variants_by_name</code><span class="sig-paren">(</span><em>names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN.iter_variants_by_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN.iter_variants_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates over variants using a list of names.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a>) – A list of names to extract specific variants.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 
 
