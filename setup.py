@@ -16,7 +16,7 @@ from setuptools import setup
 
 MAJOR = 0
 MINOR = 3
-MICRO = 0
+MICRO = 1
 VERSION = "{}.{}.{}".format(MAJOR, MINOR, MICRO)
 
 
@@ -41,7 +41,7 @@ def write_version_file(fn=None):
 
 def get_requirements():
     # Initial requirements
-    requirements = ["numpy >= 1.13.0", "six >= 1.10.0", "setuptools >= 27.0"]
+    requirements = ["numpy >= 1.11.0", "six >= 1.10.0", "setuptools >= 27.0"]
 
     return requirements
 
