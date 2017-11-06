@@ -95,7 +95,7 @@ class ParallelPyBGEN(PyBGEN):
 
         return self._parallel_iter_seeks(seeks)
 
-    def iter_variants_by_name(self, names):
+    def iter_variants_by_names(self, names):
         """Iterates over variants using a list of names.
 
         Args:
