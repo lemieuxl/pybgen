@@ -32,7 +32,7 @@ platforms="all"
 # Building
 for python_build_version in $python_versions; do
     # Building
-    conda build --numpy=1.13 --python $python_build_version pybgen &> log.txt
+    conda build --python $python_build_version pybgen &> log.txt
 
     # Checking the build was completed
     if [ $? -ne 0 ]; then

@@ -59,7 +59,7 @@ class ParallelReaderTests(ReaderTests):
         ]
 
         seen_variants = set()
-        iterator = self.bgen.iter_variants_by_name(names)
+        iterator = self.bgen.iter_variants_by_names(names)
         for variant, dosage in iterator:
             # The name of the variant
             name = variant.name
