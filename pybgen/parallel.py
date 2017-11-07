@@ -116,11 +116,18 @@ class ParallelPyBGEN(PyBGEN):
 
     def _get_seeks_for_names(self, names):
         """Gets the seek values for each names."""
+        # Generating a temporary table that will contain the markers to extract
+        self._bgen_index.execute("CREATE TEMPORARY TABLE tnames (name text)")
+        self._bgen_index.executemany(
+            "INSERT INTO tnames VALUES (?)",
+            [(n, ) for n in names],
+        )
+
+        # Fetching the seek positions
         self._bgen_index.execute(
             "SELECT file_start_position "
             "FROM Variant "
-            "WHERE rsid IN ({})".format(",".join(["?"]*len(names))),
-            tuple(names),
+            "WHERE rsid IN (SELECT name FROM tnames)",
         )
         return tuple(_[0] for _ in self._bgen_index.fetchall())
 
