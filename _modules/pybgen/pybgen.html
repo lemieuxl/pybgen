@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pybgen.pybgen &#8212; pybgen 0.4.1 documentation</title>
+    <title>pybgen.pybgen &#8212; pybgen 0.4.2 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.4.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -30,8 +22,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   <div class="document">
     
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -66,12 +57,14 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -249,8 +242,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="c1"># Closing the index file (if in read mode)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_index</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_index</span><span class="p">:</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nb_variants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -301,8 +294,8 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_variant_block</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">()</span></div>
+</div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">()</span>
 
 <div class="viewcode-block" id="PyBGEN.iter_variants"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.iter_variants">[docs]</a>    <span class="k">def</span> <span class="nf">iter_variants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Iterates over variants from the beginning of the BGEN file.</span>
@@ -317,8 +310,8 @@
         <span class="c1"># Seeking back to the first variant block</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_first_variant_block</span><span class="p">)</span>
 
-        <span class="c1"># Return itself (the generator)</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
+        <span class="c1"># Return itself (the generator)</span></div>
+        <span class="k">return</span> <span class="bp">self</span>
 
 <div class="viewcode-block" id="PyBGEN.iter_variants_in_region"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.iter_variants_in_region">[docs]</a>    <span class="k">def</span> <span class="nf">iter_variants_in_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Iterates over variants in a specific region.</span>
@@ -342,8 +335,8 @@
 
         <span class="c1"># Fetching seek positions, we return the variant</span>
         <span class="k">for</span> <span class="n">seek_pos</span> <span class="ow">in</span> <span class="n">seek_positions</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_pos</span><span class="p">)</span>
-            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_pos</span><span class="p">)</span></div>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">()</span>
 
 <div class="viewcode-block" id="PyBGEN.iter_variant_info"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.iter_variant_info">[docs]</a>    <span class="k">def</span> <span class="nf">iter_variant_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Iterate over marker information.&quot;&quot;&quot;</span>
@@ -358,8 +351,8 @@
         <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchmany</span><span class="p">(</span><span class="n">array_size</span><span class="p">)</span>
         <span class="k">while</span> <span class="n">results</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">rsid</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="n">_Variant</span><span class="p">(</span><span class="n">rsid</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
-            <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchmany</span><span class="p">(</span><span class="n">array_size</span><span class="p">)</span></div>
+                <span class="k">yield</span> <span class="n">_Variant</span><span class="p">(</span><span class="n">rsid</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span></div>
+            <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchmany</span><span class="p">(</span><span class="n">array_size</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_iter_seeks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seeks</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Iterate over seek positions.&quot;&quot;&quot;</span>
@@ -398,8 +391,8 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: name not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">results</span></div>
+</div>
+        <span class="k">return</span> <span class="n">results</span>
 
     <span class="k">def</span> <span class="nf">_read_current_variant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reads the current variant.&quot;&quot;&quot;</span>
@@ -455,7 +448,7 @@
                 <span class="n">c</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&lt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="c1"># Getting the probabilities</span>
-            <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span>
+            <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_decompress</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">c</span><span class="p">)),</span>
                 <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;u2&quot;</span><span class="p">,</span>
             <span class="p">)</span> <span class="o">/</span> <span class="mi">32768</span>
@@ -516,7 +509,7 @@
 
             <span class="c1"># Check the list of N bytes for missingness (since we assume only</span>
             <span class="c1"># diploid values for each sample)</span>
-            <span class="n">ploidy_info</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+            <span class="n">ploidy_info</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
             <span class="n">ploidy_info</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unpackbits</span><span class="p">(</span>
                 <span class="n">ploidy_info</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ploidy_info</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
                 <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -542,13 +535,13 @@
             <span class="c1"># values)</span>
             <span class="n">probs</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
-                <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+                <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>
-                <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+                <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">32</span><span class="p">:</span>
-                <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
+                <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">probs</span> <span class="o">=</span> <span class="n">_pack_bits</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
@@ -624,7 +617,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_header_size</span> <span class="o">-</span> <span class="mi">20</span><span class="p">)</span>
 
         <span class="c1"># Reading the flag</span>
-        <span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
         <span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unpackbits</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">flag</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Getting the compression type from the layout</span>
@@ -724,8 +717,8 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: invalid index&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_no_decompress</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">data</span></div>
+    <span class="k">def</span> <span class="nf">_no_decompress</span><span class="p">(</span><span class="n">data</span><span class="p">):</span></div>
+        <span class="k">return</span> <span class="n">data</span>
 
 
 <span class="k">def</span> <span class="nf">_bits_to_int</span><span class="p">(</span><span class="n">bits</span><span class="p">):</span>
@@ -788,7 +781,7 @@
       &copy;2017, Louis-Philippe Lemieux Perreault.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

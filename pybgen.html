@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pybgen’s API &#8212; pybgen 0.4.1 documentation</title>
+    <title>pybgen’s API &#8212; pybgen 0.4.2 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.4.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -31,8 +23,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   <div class="document">
     
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -68,12 +59,14 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -104,7 +97,7 @@
 </tbody>
 </table>
 <p>Reads or write BGEN files.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pybgen</span> <span class="kn">import</span> <span class="n">PyBGEN</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pybgen</span> <span class="kn">import</span> <span class="n">PyBGEN</span>
 
 <span class="c1"># Reading a BGEN file</span>
 <span class="k">with</span> <span class="n">PyBGEN</span><span class="p">(</span><span class="s2">&quot;bgen_file_name&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">bgen</span><span class="p">:</span>
@@ -218,7 +211,7 @@ has more than one item if there are duplicated variants.</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The variant’s information and its genotypes (dosage) as
-<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.13)"><code class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></code></a>.</td>
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.6)">tuple</a></td>
 </tr>
@@ -253,18 +246,18 @@ has more than one item if there are duplicated variants.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The verbosity level for <a class="reference external" href="https://docs.python.org/3/library/unittest.html#module-unittest" title="(in Python v3.6)"><code class="xref py py-mod docutils literal"><span class="pre">unittest</span></code></a>.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The verbosity level for <a class="reference external" href="https://docs.python.org/3/library/unittest.html#module-unittest" title="(in Python v3.6)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unittest</span></code></a>.</td>
 </tr>
 </tbody>
 </table>
-<p>Just set <code class="docutils literal"><span class="pre">verbosity</span></code> to an integer higher than <code class="docutils literal"><span class="pre">1</span></code> to have more
+<p>Just set <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> to an integer higher than <code class="docutils literal notranslate"><span class="pre">1</span></code> to have more
 information about the tests.</p>
 </dd></dl>
 
 </div>
 <div class="section" id="parallel-pybgen-class">
 <h2>Parallel PyBGEN class<a class="headerlink" href="#parallel-pybgen-class" title="Permalink to this headline">¶</a></h2>
-<p>We provide a wrapper class called <a class="reference internal" href="#pybgen.ParallelPyBGEN" title="pybgen.ParallelPyBGEN"><code class="xref py py-class docutils literal"><span class="pre">ParallelPyBGEN</span></code></a> which implements
+<p>We provide a wrapper class called <a class="reference internal" href="#pybgen.ParallelPyBGEN" title="pybgen.ParallelPyBGEN"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelPyBGEN</span></code></a> which implements
 two functions to iterate over variants in parallel.</p>
 <dl class="class">
 <dt id="pybgen.ParallelPyBGEN">
@@ -285,7 +278,7 @@ two functions to iterate over variants in parallel.</p>
 </tbody>
 </table>
 <p>Reads a BGEN file using multiple processes.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pybgen</span> <span class="kn">import</span> <span class="n">ParrallelPyBGEN</span> <span class="k">as</span> <span class="n">PyBGEN</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pybgen</span> <span class="kn">import</span> <span class="n">ParrallelPyBGEN</span> <span class="k">as</span> <span class="n">PyBGEN</span>
 
 <span class="c1"># Reading a BGEN file</span>
 <span class="k">with</span> <span class="n">PyBGEN</span><span class="p">(</span><span class="s2">&quot;bgen_file_name&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">bgen</span><span class="p">:</span>
@@ -327,7 +320,7 @@ two functions to iterate over variants in parallel.</p>
       &copy;2017, Louis-Philippe Lemieux Perreault.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
