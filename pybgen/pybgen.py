@@ -372,7 +372,7 @@ class PyBGEN(object):
                 c = unpack("<I", self._bgen.read(4))[0]
 
             # Getting the probabilities
-            probs = np.fromstring(
+            probs = np.frombuffer(
                 self._decompress(self._bgen.read(c)),
                 dtype="u2",
             ) / 32768
@@ -433,7 +433,7 @@ class PyBGEN(object):
 
             # Check the list of N bytes for missingness (since we assume only
             # diploid values for each sample)
-            ploidy_info = np.fromstring(data[:n], dtype=np.uint8)
+            ploidy_info = np.frombuffer(data[:n], dtype=np.uint8)
             ploidy_info = np.unpackbits(
                 ploidy_info.reshape(1, ploidy_info.shape[0]).T,
                 axis=1,
@@ -459,13 +459,13 @@ class PyBGEN(object):
             # values)
             probs = None
             if b == 8:
-                probs = np.fromstring(data, dtype=np.uint8)
+                probs = np.frombuffer(data, dtype=np.uint8)
 
             elif b == 16:
-                probs = np.fromstring(data, dtype=np.uint16)
+                probs = np.frombuffer(data, dtype=np.uint16)
 
             elif b == 32:
-                probs = np.fromstring(data, dtype=np.uint32)
+                probs = np.frombuffer(data, dtype=np.uint32)
 
             else:
                 probs = _pack_bits(data, b)
@@ -541,7 +541,7 @@ class PyBGEN(object):
         self._bgen.read(self._header_size - 20)
 
         # Reading the flag
-        flag = np.fromstring(self._bgen.read(4), dtype=np.uint8)
+        flag = np.frombuffer(self._bgen.read(4), dtype=np.uint8)
         flag = np.unpackbits(flag.reshape(1, flag.shape[0]).T, axis=1)
 
         # Getting the compression type from the layout
