@@ -90,6 +90,10 @@ class ParallelProbsReaderTests(ParallelReaderTests):
         bgen_fn = resource_filename(__name__, self.bgen_filename)
         self.bgen = ParallelPyBGEN(bgen_fn, probs_only=True)
 
+    def test_check_returned_value(self):
+        """Tests the module is returning probability data."""
+        self.assertTrue(self.bgen._return_probs)
+
 
 class Test32bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.32bits.bgen")

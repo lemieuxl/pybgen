@@ -59,6 +59,10 @@ class ReaderTests(unittest.TestCase):
         self.assertEqual(expected.a1, observed.a1)
         self.assertEqual(expected.a2, observed.a2)
 
+    def test_check_returned_value(self):
+        """Tests the module is returning dosage data."""
+        self.assertFalse(self.bgen._return_probs)
+
     def test_repr(self):
         """Tests the __repr__ representation."""
         self.assertEqual(
@@ -278,6 +282,10 @@ class ProbsReaderTests(ReaderTests):
         # Reading the BGEN files
         bgen_fn = resource_filename(__name__, self.bgen_filename)
         self.bgen = pybgen.PyBGEN(bgen_fn, probs_only=True)
+
+    def test_check_returned_value(self):
+        """Tests the module is returning probability data."""
+        self.assertTrue(self.bgen._return_probs)
 
 
 class Test32bits(ReaderTests):
