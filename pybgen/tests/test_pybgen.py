@@ -362,8 +362,9 @@ class TestLayout1Probs(ProbsReaderTests):
     truth_filename = "cohort1.probs.truths.txt.bz2"
 
 
-reader_tests = (Test32bits, Test24bits, Test16bits, Test16bitsZstd, Test9bits,
-                Test8bits, Test3bits, TestLayout1, Test32bitsProbs,
-                Test24bitsProbs, Test16bitsProbs, Test16bitsZstdProbs,
-                Test9bitsProbs, Test8bitsProbs, Test3bitsProbs,
-                TestLayout1Probs)
+reader_tests = (
+    Test32bits, Test24bits, Test16bits, Test16bitsZstd, Test9bits, Test8bits,
+    Test3bits, TestLayout1, Test32bitsProbs, Test24bitsProbs, Test16bitsProbs,
+    Test16bitsZstdProbs, Test9bitsProbs, Test8bitsProbs, Test3bitsProbs,
+    TestLayout1Probs,
+)

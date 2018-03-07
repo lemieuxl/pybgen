@@ -156,7 +156,6 @@ class Test8bitsProbs(ParallelProbsReaderTests):
 class Test3bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.3bits.bgen")
     truth_filename = "example.3bits.truths.txt.bz2"
-    probs_truth_filename = "example.3bits.probs.truths.txt.bz2"
 
 
 class Test3bitsProbs(ParallelProbsReaderTests):
@@ -167,7 +166,6 @@ class Test3bitsProbs(ParallelProbsReaderTests):
 class TestLayout1(ParallelReaderTests):
     bgen_filename = os.path.join("data", "cohort1.bgen")
     truth_filename = "cohort1.truths.txt.bz2"
-    probs_truth_filename = "cohort1.probs.truths.txt.bz2"
 
 
 class TestLayout1Probs(ParallelProbsReaderTests):
@@ -175,8 +173,9 @@ class TestLayout1Probs(ParallelProbsReaderTests):
     truth_filename = "cohort1.probs.truths.txt.bz2"
 
 
-parallel_reader_tests = (Test32bits, Test24bits, Test16bits, Test16bitsZstd,
-                         Test9bits, Test8bits, Test3bits, TestLayout1,
-                         Test32bitsProbs, Test24bitsProbs, Test16bitsProbs,
-                         Test16bitsZstdProbs, Test9bitsProbs, Test8bitsProbs,
-                         Test3bitsProbs, TestLayout1Probs)
+parallel_reader_tests = (
+    Test32bits, Test24bits, Test16bits, Test16bitsZstd, Test9bits, Test8bits,
+    Test3bits, TestLayout1, Test32bitsProbs, Test24bitsProbs, Test16bitsProbs,
+    Test16bitsZstdProbs, Test9bitsProbs, Test8bitsProbs, Test3bitsProbs,
+    TestLayout1Probs,
+)
