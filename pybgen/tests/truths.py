@@ -104,13 +104,11 @@ def _generate_truths():
                 name, chrom, pos, a1, a2 = variant_data[:5]
                 variant = Variant(name, chrom, int(pos), a1, a2)
                 values = np.array(variant_data[5:], dtype=float)
-                key = "dosage"
                 if is_probs:
-                    key = "probs"
                     values.shape = (nb_samples, 3)
                 file_truths["variants"][name] = {
                     "variant": variant,
-                    key: values,
+                    "data": values,
                 }
 
         # Saving the file truths
