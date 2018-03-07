@@ -24,10 +24,8 @@
 
 
 import os
-import shutil
 import random
 import unittest
-from tempfile import mkdtemp
 
 import numpy as np
 from pkg_resources import resource_filename
@@ -41,23 +39,13 @@ __all__ = ["reader_tests"]
 
 class ReaderTests(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        # Creating a temporary directory
-        cls.tmp_dir = mkdtemp(prefix="pybgen_test_")
-
     def setUp(self):
         # Getting the truth for this file
-        self.truths = truths[self.truth_filename]
+        self.truths = truths["dosage"][self.truth_filename]
 
-        # Reading the BGEN file
+        # Reading the BGEN files
         bgen_fn = resource_filename(__name__, self.bgen_filename)
         self.bgen = pybgen.PyBGEN(bgen_fn)
-
-    @classmethod
-    def tearDownClass(cls):
-        # Cleaning the temporary directory
-        shutil.rmtree(cls.tmp_dir)
 
     def tearDown(self):
         # Closing the object
@@ -71,11 +59,16 @@ class ReaderTests(unittest.TestCase):
         self.assertEqual(expected.a1, observed.a1)
         self.assertEqual(expected.a2, observed.a2)
 
+    def test_check_returned_value(self):
+        """Tests the module is returning dosage data."""
+        self.assertFalse(self.bgen._return_probs)
+
     def test_repr(self):
         """Tests the __repr__ representation."""
         self.assertEqual(
             "PyBGEN({:,d} samples; {:,d} variants)".format(
-                self.truths["nb_samples"], self.truths["nb_variants"],
+                self.truths["nb_samples"],
+                self.truths["nb_variants"],
             ),
             str(self.bgen),
         )
@@ -107,13 +100,12 @@ class ReaderTests(unittest.TestCase):
 
         # Checking the variant
         self._compare_variant(
-            self.truths["variants"][name]["variant"],
-            variant,
+            self.truths["variants"][name]["variant"], variant,
         )
 
         # Checking the dosage
         np.testing.assert_array_almost_equal(
-            self.truths["variants"][name]["dosage"], dosage,
+            self.truths["variants"][name]["data"], dosage,
         )
 
     def test_get_middle_variant(self):
@@ -128,13 +120,12 @@ class ReaderTests(unittest.TestCase):
 
         # Checking the variant
         self._compare_variant(
-            self.truths["variants"][name]["variant"],
-            variant,
+            self.truths["variants"][name]["variant"], variant,
         )
 
         # Checking the dosage
         np.testing.assert_array_almost_equal(
-            self.truths["variants"][name]["dosage"], dosage,
+            self.truths["variants"][name]["data"], dosage,
         )
 
     def test_get_last_variant(self):
@@ -149,13 +140,12 @@ class ReaderTests(unittest.TestCase):
 
         # Checking the variant
         self._compare_variant(
-            self.truths["variants"][name]["variant"],
-            variant,
+            self.truths["variants"][name]["variant"], variant,
         )
 
         # Checking the dosage
         np.testing.assert_array_almost_equal(
-            self.truths["variants"][name]["dosage"], dosage,
+            self.truths["variants"][name]["data"], dosage,
         )
 
     def test_get_missing_variant(self):
@@ -183,7 +173,7 @@ class ReaderTests(unittest.TestCase):
 
             # Comparing the dosage
             np.testing.assert_array_almost_equal(
-                self.truths["variants"][name]["dosage"], dosage,
+                self.truths["variants"][name]["data"], dosage,
             )
 
         # Checking if we checked all variants
@@ -199,13 +189,12 @@ class ReaderTests(unittest.TestCase):
 
             # Comparing the variant
             self._compare_variant(
-                self.truths["variants"][name]["variant"],
-                variant,
+                self.truths["variants"][name]["variant"], variant,
             )
 
             # Comparing the dosage
             np.testing.assert_array_almost_equal(
-                self.truths["variants"][name]["dosage"], dosage,
+                self.truths["variants"][name]["data"], dosage,
             )
 
         # Checking if we checked all variants
@@ -221,8 +210,7 @@ class ReaderTests(unittest.TestCase):
 
             # Comparing the variant
             self._compare_variant(
-                self.truths["variants"][name]["variant"],
-                variant,
+                self.truths["variants"][name]["variant"], variant,
             )
 
         # Checking if we checked all variants
@@ -239,13 +227,12 @@ class ReaderTests(unittest.TestCase):
 
             # Comparing the variant
             self._compare_variant(
-                self.truths["variants"][name]["variant"],
-                variant,
+                self.truths["variants"][name]["variant"], variant,
             )
 
             # Comparing the dosage
             np.testing.assert_array_almost_equal(
-                self.truths["variants"][name]["dosage"], dosage,
+                self.truths["variants"][name]["data"], dosage,
             )
 
         # Checking if we checked all variants
@@ -274,17 +261,31 @@ class ReaderTests(unittest.TestCase):
 
             # Comparing the variant
             self._compare_variant(
-                self.truths["variants"][name]["variant"],
-                variant,
+                self.truths["variants"][name]["variant"], variant,
             )
 
             # Comparing the dosage
             np.testing.assert_array_almost_equal(
-                self.truths["variants"][name]["dosage"], dosage,
+                self.truths["variants"][name]["data"], dosage,
             )
 
         # Checking if we checked all variants
         self.assertEqual(seen_variants, {_[0] for _ in seeks})
+
+
+class ProbsReaderTests(ReaderTests):
+
+    def setUp(self):
+        # Getting the truth for this file
+        self.truths = truths["probs"][self.truth_filename]
+
+        # Reading the BGEN files
+        bgen_fn = resource_filename(__name__, self.bgen_filename)
+        self.bgen = pybgen.PyBGEN(bgen_fn, probs_only=True)
+
+    def test_check_returned_value(self):
+        """Tests the module is returning probability data."""
+        self.assertTrue(self.bgen._return_probs)
 
 
 class Test32bits(ReaderTests):
@@ -292,14 +293,29 @@ class Test32bits(ReaderTests):
     truth_filename = "example.32bits.truths.txt.bz2"
 
 
+class Test32bitsProbs(ProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.32bits.bgen")
+    truth_filename = "example.32bits.probs.truths.txt.bz2"
+
+
 class Test24bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.24bits.bgen")
     truth_filename = "example.24bits.truths.txt.bz2"
 
 
+class Test24bitsProbs(ProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.24bits.bgen")
+    truth_filename = "example.24bits.probs.truths.txt.bz2"
+
+
 class Test16bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.16bits.bgen")
     truth_filename = "example.16bits.truths.txt.bz2"
+
+
+class Test16bitsProbs(ProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.16bits.bgen")
+    truth_filename = "example.16bits.probs.truths.txt.bz2"
 
 
 @unittest.skipIf(not pybgen.HAS_ZSTD, "module 'zstandard' not installed")
@@ -308,9 +324,20 @@ class Test16bitsZstd(ReaderTests):
     truth_filename = "example.16bits.zstd.truths.txt.bz2"
 
 
+@unittest.skipIf(not pybgen.HAS_ZSTD, "module 'zstandard' not installed")
+class Test16bitsZstdProbs(ProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.16bits.zstd.bgen")
+    truth_filename = "example.16bits.zstd.probs.truths.txt.bz2"
+
+
 class Test9bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.9bits.bgen")
     truth_filename = "example.9bits.truths.txt.bz2"
+
+
+class Test9bitsProbs(ProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.9bits.bgen")
+    truth_filename = "example.9bits.probs.truths.txt.bz2"
 
 
 class Test8bits(ReaderTests):
@@ -318,9 +345,19 @@ class Test8bits(ReaderTests):
     truth_filename = "example.8bits.truths.txt.bz2"
 
 
+class Test8bitsProbs(ProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.8bits.bgen")
+    truth_filename = "example.8bits.probs.truths.txt.bz2"
+
+
 class Test3bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.3bits.bgen")
     truth_filename = "example.3bits.truths.txt.bz2"
+
+
+class Test3bitsProbs(ProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.3bits.bgen")
+    truth_filename = "example.3bits.probs.truths.txt.bz2"
 
 
 class TestLayout1(ReaderTests):
@@ -328,5 +365,14 @@ class TestLayout1(ReaderTests):
     truth_filename = "cohort1.truths.txt.bz2"
 
 
-reader_tests = (Test32bits, Test24bits, Test16bits, Test16bitsZstd, Test9bits,
-                Test8bits, Test3bits, TestLayout1)
+class TestLayout1Probs(ProbsReaderTests):
+    bgen_filename = os.path.join("data", "cohort1.bgen")
+    truth_filename = "cohort1.probs.truths.txt.bz2"
+
+
+reader_tests = (
+    Test32bits, Test24bits, Test16bits, Test16bitsZstd, Test9bits, Test8bits,
+    Test3bits, TestLayout1, Test32bitsProbs, Test24bitsProbs, Test16bitsProbs,
+    Test16bitsZstdProbs, Test9bitsProbs, Test8bitsProbs, Test3bitsProbs,
+    TestLayout1Probs,
+)
