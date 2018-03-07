@@ -86,6 +86,7 @@ class PyBGEN(object):
         fn (str): The name of the BGEN file.
         mode (str): The open mode for the BGEN file.
         prob_t (float): The probability threshold (optional).
+        probs_only (boolean): Return only the probabilities instead of dosage.
 
     Reads or write BGEN files.
 
@@ -99,10 +100,14 @@ class PyBGEN(object):
 
     """
 
-    def __init__(self, fn, mode="r", prob_t=0.9, _skip_index=False):
+    def __init__(self, fn, mode="r", prob_t=0.9, _skip_index=False,
+                 probs_only=False):
         """Initializes a new PyBGEN instance."""
         # The mode
         self._mode = mode
+
+        # What to return
+        self._return_probs = probs_only
 
         if self._mode == "r":
             # Parsing the file
@@ -324,7 +329,7 @@ class PyBGEN(object):
         var_id, rs_id, chrom, pos, alleles = self._get_curr_variant_info()
 
         # Getting the variant's dosage
-        dosage = self._get_curr_variant_dosage()
+        dosage = self._get_curr_variant_data()
 
         return _Variant(rs_id, chrom, pos, *alleles), dosage
 
@@ -363,121 +368,157 @@ class PyBGEN(object):
 
         return var_id, rs_id, chrom, pos, tuple(alleles)
 
-    def _get_curr_variant_dosage(self):
-        """Gets the current variant's dosage."""
-        dosage = None
-        if self._layout == 1:
-            c = self._nb_samples
-            if self._is_compressed:
-                c = unpack("<I", self._bgen.read(4))[0]
-
-            # Getting the probabilities
-            probs = np.frombuffer(
-                self._decompress(self._bgen.read(c)),
-                dtype="u2",
-            ) / 32768
-            probs.shape = (self._nb_samples, 3)
-
-            # Computing the dosage
-            dosage = self._layout_1_probs_to_dosage(probs)
-
-        else:
-            # The total length C of the rest of the data for this variant
+    def _get_curr_variant_probs_layout_1(self):
+        """Gets the current variant's probabilities (layout 1)."""
+        c = self._nb_samples
+        if self._is_compressed:
             c = unpack("<I", self._bgen.read(4))[0]
 
-            # The number of bytes to read
-            to_read = c
+        # Getting the probabilities
+        probs = np.frombuffer(
+            self._decompress(self._bgen.read(c)),
+            dtype="u2",
+        ) / 32768
+        probs.shape = (self._nb_samples, 3)
 
-            # D = C if no compression
-            d = c
-            if self._is_compressed:
-                # The total length D of the probability data after
-                # decompression
-                d = unpack("<I", self._bgen.read(4))[0]
-                to_read = c - 4
+        return probs
 
-            # Reading the data and checking
-            data = self._decompress(self._bgen.read(to_read))
-            if len(data) != d:
-                raise ValueError(
-                    "{}: invalid BGEN file".format(self._bgen.name)
-                )
+    def _get_curr_variant_probs_layout_2(self):
+        """Gets the current variant's probabilities (layout 2)."""
+        # The total length C of the rest of the data for this variant
+        c = unpack("<I", self._bgen.read(4))[0]
 
-            # Checking the number of samples
-            n = unpack("<I", data[:4])[0]
-            if n != self._nb_samples:
-                raise ValueError(
-                    "{}: invalid BGEN file".format(self._bgen.name)
-                )
-            data = data[4:]
+        # The number of bytes to read
+        to_read = c
 
-            # Checking the number of alleles (we only accept 2 alleles)
-            nb_alleles = unpack("<H", data[:2])[0]
-            if nb_alleles != 2:
-                raise ValueError(
-                    "{}: only two alleles are "
-                    "supported".format(self._bgen.name)
-                )
-            data = data[2:]
+        # D = C if no compression
+        d = c
+        if self._is_compressed:
+            # The total length D of the probability data after
+            # decompression
+            d = unpack("<I", self._bgen.read(4))[0]
+            to_read = c - 4
 
-            # TODO: Check ploidy for sexual chromosomes
-            # The minimum and maximum for ploidy (we only accept ploidy of 2)
-            min_ploidy = _byte_to_int(data[0])
-            max_ploidy = _byte_to_int(data[1])
-            if min_ploidy != 2 and max_ploidy != 2:
-                raise ValueError(
-                    "{}: only accepting ploidy of "
-                    "2".format(self._bgen.name)
-                )
-            data = data[2:]
-
-            # Check the list of N bytes for missingness (since we assume only
-            # diploid values for each sample)
-            ploidy_info = np.frombuffer(data[:n], dtype=np.uint8)
-            ploidy_info = np.unpackbits(
-                ploidy_info.reshape(1, ploidy_info.shape[0]).T,
-                axis=1,
+        # Reading the data and checking
+        data = self._decompress(self._bgen.read(to_read))
+        if len(data) != d:
+            raise ValueError(
+                "{}: invalid BGEN file".format(self._bgen.name)
             )
-            missing_data = ploidy_info[:, 0] == 1
-            data = data[n:]
 
-            # TODO: Permit phased data
-            # Is the data phased?
-            is_phased = data[0] == 1
-            if is_phased:
-                raise ValueError(
-                    "{}: only accepting unphased "
-                    "data".format(self._bgen.name)
-                )
-            data = data[1:]
+        # Checking the number of samples
+        n = unpack("<I", data[:4])[0]
+        if n != self._nb_samples:
+            raise ValueError(
+                "{}: invalid BGEN file".format(self._bgen.name)
+            )
+        data = data[4:]
 
-            # The number of bits used to encode each probabilities
-            b = _byte_to_int(data[0])
-            data = data[1:]
+        # Checking the number of alleles (we only accept 2 alleles)
+        nb_alleles = unpack("<H", data[:2])[0]
+        if nb_alleles != 2:
+            raise ValueError(
+                "{}: only two alleles are "
+                "supported".format(self._bgen.name)
+            )
+        data = data[2:]
 
-            # Reading the probabilities (don't forget we allow only for diploid
-            # values)
-            probs = None
-            if b == 8:
-                probs = np.frombuffer(data, dtype=np.uint8)
+        # TODO: Check ploidy for sexual chromosomes
+        # The minimum and maximum for ploidy (we only accept ploidy of 2)
+        min_ploidy = _byte_to_int(data[0])
+        max_ploidy = _byte_to_int(data[1])
+        if min_ploidy != 2 and max_ploidy != 2:
+            raise ValueError(
+                "{}: only accepting ploidy of "
+                "2".format(self._bgen.name)
+            )
+        data = data[2:]
 
-            elif b == 16:
-                probs = np.frombuffer(data, dtype=np.uint16)
+        # Check the list of N bytes for missingness (since we assume only
+        # diploid values for each sample)
+        ploidy_info = np.frombuffer(data[:n], dtype=np.uint8)
+        ploidy_info = np.unpackbits(
+            ploidy_info.reshape(1, ploidy_info.shape[0]).T,
+            axis=1,
+        )
+        missing_data = ploidy_info[:, 0] == 1
+        data = data[n:]
 
-            elif b == 32:
-                probs = np.frombuffer(data, dtype=np.uint32)
+        # TODO: Permit phased data
+        # Is the data phased?
+        is_phased = data[0] == 1
+        if is_phased:
+            raise ValueError(
+                "{}: only accepting unphased "
+                "data".format(self._bgen.name)
+            )
+        data = data[1:]
+
+        # The number of bits used to encode each probabilities
+        b = _byte_to_int(data[0])
+        data = data[1:]
+
+        # Reading the probabilities (don't forget we allow only for diploid
+        # values)
+        probs = None
+        if b == 8:
+            probs = np.frombuffer(data, dtype=np.uint8)
+
+        elif b == 16:
+            probs = np.frombuffer(data, dtype=np.uint16)
+
+        elif b == 32:
+            probs = np.frombuffer(data, dtype=np.uint32)
+
+        else:
+            probs = _pack_bits(data, b)
+
+        # Changing shape and computing dosage
+        probs.shape = (self._nb_samples, 2)
+
+        return probs / (2**b - 1), missing_data
+
+    def _get_curr_variant_data(self):
+        """Gets the current variant's dosage or probabilities."""
+        if self._layout == 1:
+            # Getting the probabilities
+            probs = self._get_curr_variant_probs_layout_1()
+
+            if self._return_probs:
+                # Returning the probabilities
+                return probs
 
             else:
-                probs = _pack_bits(data, b)
+                # Returning the dosage
+                return self._layout_1_probs_to_dosage(probs)
 
-            # Changing shape and computing dosage
-            probs.shape = (self._nb_samples, 2)
-            dosage = self._layout_2_probs_to_dosage(probs / (2**b - 1))
+        else:
+            # Getting the probabilities
+            probs, missing_data = self._get_curr_variant_probs_layout_2()
 
-            # Setting the missing to NaN
-            dosage[missing_data] = np.nan
+            if self._return_probs:
+                # Getting the alternative allele homozygous probabilities
+                last_probs = self._get_layout_2_last_probs(probs)
 
-        return dosage
+                # Stacking the probabilities
+                last_probs.shape = (last_probs.shape[0], 1)
+                full_probs = np.hstack((probs, last_probs))
+
+                # Setting the missing to NaN
+                full_probs[missing_data] = np.nan
+
+                # Returning the probabilities
+                return full_probs
+
+            else:
+                # Computing the dosage
+                dosage = self._layout_2_probs_to_dosage(probs)
+
+                # Setting the missing to NaN
+                dosage[missing_data] = np.nan
+
+                # Returning the dosage
+                return dosage
 
     def _layout_1_probs_to_dosage(self, probs):
         """Transforms probability values to dosage (from layout 1)"""
@@ -488,10 +529,15 @@ class PyBGEN(object):
 
         return dosage
 
+    @staticmethod
+    def _get_layout_2_last_probs(probs):
+        """Gets the layout 2 last probabilities (homo alternative)."""
+        return 1 - np.sum(probs, axis=1)
+
     def _layout_2_probs_to_dosage(self, probs):
         """Transforms probability values to dosage (from layout 2)."""
         # Computing the last genotype's probabilities
-        last_probs = 1 - np.sum(probs, axis=1)
+        last_probs = self._get_layout_2_last_probs(probs)
 
         # Constructing the dosage
         dosage = 2 * last_probs + probs[:, 1]
