@@ -44,7 +44,7 @@ class ParallelReaderTests(ReaderTests):
 
     def setUp(self):
         # Getting the truth for this file
-        self.truths = truths[self.truth_filename]
+        self.truths = truths["dosage"][self.truth_filename]
 
         # Reading the BGEN file
         bgen_fn = resource_filename(__name__, self.bgen_filename)
@@ -73,11 +73,26 @@ class ParallelReaderTests(ReaderTests):
 
             # Comparing the dosage
             np.testing.assert_array_almost_equal(
-                self.truths["variants"][name]["dosage"], dosage,
+                self.truths["variants"][name]["data"], dosage,
             )
 
         # Checking if we checked all variants
         self.assertEqual(seen_variants, set(names))
+
+
+class ParallelProbsReaderTests(ParallelReaderTests):
+
+    def setUp(self):
+        # Getting the truth for this file
+        self.truths = truths["probs"][self.truth_filename]
+
+        # Reading the BGEN file
+        bgen_fn = resource_filename(__name__, self.bgen_filename)
+        self.bgen = ParallelPyBGEN(bgen_fn, probs_only=True)
+
+    def test_check_returned_value(self):
+        """Tests the module is returning probability data."""
+        self.assertTrue(self.bgen._return_probs)
 
 
 class Test32bits(ParallelReaderTests):
@@ -85,14 +100,29 @@ class Test32bits(ParallelReaderTests):
     truth_filename = "example.32bits.truths.txt.bz2"
 
 
+class Test32bitsProbs(ParallelProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.32bits.bgen")
+    truth_filename = "example.32bits.probs.truths.txt.bz2"
+
+
 class Test24bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.24bits.bgen")
     truth_filename = "example.24bits.truths.txt.bz2"
 
 
+class Test24bitsProbs(ParallelProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.24bits.bgen")
+    truth_filename = "example.24bits.probs.truths.txt.bz2"
+
+
 class Test16bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.16bits.bgen")
     truth_filename = "example.16bits.truths.txt.bz2"
+
+
+class Test16bitsProbs(ParallelProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.16bits.bgen")
+    truth_filename = "example.16bits.probs.truths.txt.bz2"
 
 
 @unittest.skipIf(not HAS_ZSTD, "module 'zstandard' not installed")
@@ -101,9 +131,20 @@ class Test16bitsZstd(ParallelReaderTests):
     truth_filename = "example.16bits.zstd.truths.txt.bz2"
 
 
+@unittest.skipIf(not HAS_ZSTD, "module 'zstandard' not installed")
+class Test16bitsZstdProbs(ParallelProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.16bits.zstd.bgen")
+    truth_filename = "example.16bits.zstd.probs.truths.txt.bz2"
+
+
 class Test9bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.9bits.bgen")
     truth_filename = "example.9bits.truths.txt.bz2"
+
+
+class Test9bitsProbs(ParallelProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.9bits.bgen")
+    truth_filename = "example.9bits.probs.truths.txt.bz2"
 
 
 class Test8bits(ParallelReaderTests):
@@ -111,9 +152,19 @@ class Test8bits(ParallelReaderTests):
     truth_filename = "example.8bits.truths.txt.bz2"
 
 
+class Test8bitsProbs(ParallelProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.8bits.bgen")
+    truth_filename = "example.8bits.probs.truths.txt.bz2"
+
+
 class Test3bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.3bits.bgen")
     truth_filename = "example.3bits.truths.txt.bz2"
+
+
+class Test3bitsProbs(ParallelProbsReaderTests):
+    bgen_filename = os.path.join("data", "example.3bits.bgen")
+    truth_filename = "example.3bits.probs.truths.txt.bz2"
 
 
 class TestLayout1(ParallelReaderTests):
@@ -121,5 +172,14 @@ class TestLayout1(ParallelReaderTests):
     truth_filename = "cohort1.truths.txt.bz2"
 
 
-parallel_reader_tests = (Test32bits, Test24bits, Test16bits, Test16bitsZstd,
-                         Test9bits, Test8bits, Test3bits, TestLayout1)
+class TestLayout1Probs(ParallelProbsReaderTests):
+    bgen_filename = os.path.join("data", "cohort1.bgen")
+    truth_filename = "cohort1.probs.truths.txt.bz2"
+
+
+parallel_reader_tests = (
+    Test32bits, Test24bits, Test16bits, Test16bitsZstd, Test9bits, Test8bits,
+    Test3bits, TestLayout1, Test32bitsProbs, Test24bitsProbs, Test16bitsProbs,
+    Test16bitsZstdProbs, Test9bitsProbs, Test8bitsProbs, Test3bitsProbs,
+    TestLayout1Probs,
+)

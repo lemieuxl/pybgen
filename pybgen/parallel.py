@@ -47,9 +47,10 @@ __all__ = ["ParallelPyBGEN"]
 logger = logging.getLogger(__name__)
 
 
-def _pybgen_reader(fn, prob_t, seeks, queue):
+def _pybgen_reader(fn, prob_t, probs_only, seeks, queue):
     """Reads specific markers according to a seek queue."""
-    with PyBGEN(fn, mode="r", prob_t=prob_t, _skip_index=True) as bgen:
+    with PyBGEN(fn, mode="r", prob_t=prob_t, probs_only=probs_only,
+                _skip_index=True) as bgen:
         for r in bgen._iter_seeks(seeks):
             queue.put(r)
     queue.put(None)
@@ -62,6 +63,7 @@ class ParallelPyBGEN(PyBGEN):
         fn (str): The name of the BGEN file.
         prob_t (float): The probability threshold (optional).
         cpus (int): The number of CPUs (default is 2).
+        probs_only (boolean): Return only the probabilities instead of dosage.
         max_variants (int): The maximal number of variants in the Queue
 
     Reads a BGEN file using multiple processes.
@@ -76,10 +78,13 @@ class ParallelPyBGEN(PyBGEN):
 
     """
 
-    def __init__(self, fn, prob_t=0.9, cpus=2, max_variants=1000):
+    def __init__(self, fn, prob_t=0.9, cpus=2, probs_only=False,
+                 max_variants=1000):
         """Initializes a new PyBGEN instance."""
         # Calling the parent's constructor
-        super(ParallelPyBGEN, self).__init__(fn, mode="r", prob_t=prob_t)
+        super(ParallelPyBGEN, self).__init__(
+            fn, mode="r", prob_t=prob_t, probs_only=probs_only,
+        )
 
         # Initializing the queue and process
         self.cpus = cpus
@@ -137,7 +142,8 @@ class ParallelPyBGEN(PyBGEN):
         for i in range(self.cpus):
             worker = multiprocessing.Process(
                 target=_pybgen_reader,
-                args=(self._bgen.name, self.prob_t, seeks[i], queue),
+                args=(self._bgen.name, self.prob_t, self._return_probs,
+                      seeks[i], queue),
             )
             self._workers.append(worker)
             worker.start()
