@@ -44,11 +44,13 @@ class ParallelReaderTests(ReaderTests):
 
     def setUp(self):
         # Getting the truth for this file
-        self.truths = truths[self.truth_filename]
+        self.dosage_truths = truths["dosage"][self.truth_filename]
+        self.probs_truths = truths["probs"][self.probs_truth_filename]
 
         # Reading the BGEN file
         bgen_fn = resource_filename(__name__, self.bgen_filename)
         self.bgen = ParallelPyBGEN(bgen_fn)
+        self.bgen_probs = ParallelPyBGEN(bgen_fn, probs_only=True)
 
     def test_iter_variants_by_name(self):
         """Tests the iteration of variants by name."""
@@ -67,13 +69,43 @@ class ParallelReaderTests(ReaderTests):
 
             # Comparing the variant
             self._compare_variant(
-                self.truths["variants"][name]["variant"],
+                self.dosage_truths["variants"][name]["variant"],
                 variant,
             )
 
             # Comparing the dosage
             np.testing.assert_array_almost_equal(
-                self.truths["variants"][name]["dosage"], dosage,
+                self.dosage_truths["variants"][name]["dosage"], dosage,
+            )
+
+        # Checking if we checked all variants
+        self.assertEqual(seen_variants, set(names))
+
+    def test_iter_variants_by_name_probs(self):
+        """Tests the iteration of variants by name (probs)."""
+        # Fetching random variants in the index
+        self.bgen_probs._bgen_index.execute("SELECT rsid FROM Variant")
+        names = [
+            _[0] for _ in
+            random.sample(self.bgen_probs._bgen_index.fetchall(), 5)
+        ]
+
+        seen_variants = set()
+        iterator = self.bgen_probs.iter_variants_by_names(names)
+        for variant, probs in iterator:
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.probs_truths["variants"][name]["variant"],
+                variant,
+            )
+
+            # Comparing the dosage
+            np.testing.assert_array_almost_equal(
+                self.probs_truths["variants"][name]["probs"], probs,
             )
 
         # Checking if we checked all variants
@@ -83,42 +115,50 @@ class ParallelReaderTests(ReaderTests):
 class Test32bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.32bits.bgen")
     truth_filename = "example.32bits.truths.txt.bz2"
+    probs_truth_filename = "example.32bits.probs.truths.txt.bz2"
 
 
 class Test24bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.24bits.bgen")
     truth_filename = "example.24bits.truths.txt.bz2"
+    probs_truth_filename = "example.24bits.probs.truths.txt.bz2"
 
 
 class Test16bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.16bits.bgen")
     truth_filename = "example.16bits.truths.txt.bz2"
+    probs_truth_filename = "example.16bits.probs.truths.txt.bz2"
 
 
 @unittest.skipIf(not HAS_ZSTD, "module 'zstandard' not installed")
 class Test16bitsZstd(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.16bits.zstd.bgen")
     truth_filename = "example.16bits.zstd.truths.txt.bz2"
+    probs_truth_filename = "example.16bits.zstd.probs.truths.txt.bz2"
 
 
 class Test9bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.9bits.bgen")
     truth_filename = "example.9bits.truths.txt.bz2"
+    probs_truth_filename = "example.9bits.probs.truths.txt.bz2"
 
 
 class Test8bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.8bits.bgen")
     truth_filename = "example.8bits.truths.txt.bz2"
+    probs_truth_filename = "example.8bits.probs.truths.txt.bz2"
 
 
 class Test3bits(ParallelReaderTests):
     bgen_filename = os.path.join("data", "example.3bits.bgen")
     truth_filename = "example.3bits.truths.txt.bz2"
+    probs_truth_filename = "example.3bits.probs.truths.txt.bz2"
 
 
 class TestLayout1(ParallelReaderTests):
     bgen_filename = os.path.join("data", "cohort1.bgen")
     truth_filename = "cohort1.truths.txt.bz2"
+    probs_truth_filename = "cohort1.probs.truths.txt.bz2"
 
 
 parallel_reader_tests = (Test32bits, Test24bits, Test16bits, Test16bitsZstd,

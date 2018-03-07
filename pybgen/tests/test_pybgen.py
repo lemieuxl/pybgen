@@ -48,11 +48,13 @@ class ReaderTests(unittest.TestCase):
 
     def setUp(self):
         # Getting the truth for this file
-        self.truths = truths[self.truth_filename]
+        self.dosage_truths = truths["dosage"][self.truth_filename]
+        self.probs_truths = truths["probs"][self.probs_truth_filename]
 
-        # Reading the BGEN file
+        # Reading the BGEN files
         bgen_fn = resource_filename(__name__, self.bgen_filename)
         self.bgen = pybgen.PyBGEN(bgen_fn)
+        self.bgen_probs = pybgen.PyBGEN(bgen_fn, probs_only=True)
 
     @classmethod
     def tearDownClass(cls):
@@ -62,6 +64,7 @@ class ReaderTests(unittest.TestCase):
     def tearDown(self):
         # Closing the object
         self.bgen.close()
+        self.bgen_probs.close()
 
     def _compare_variant(self, expected, observed):
         """Compare two variants."""
@@ -75,25 +78,56 @@ class ReaderTests(unittest.TestCase):
         """Tests the __repr__ representation."""
         self.assertEqual(
             "PyBGEN({:,d} samples; {:,d} variants)".format(
-                self.truths["nb_samples"], self.truths["nb_variants"],
+                self.dosage_truths["nb_samples"],
+                self.dosage_truths["nb_variants"],
             ),
             str(self.bgen),
         )
 
+    def test_repr_probs(self):
+        """Tests the __repr__ representation (probs)."""
+        self.assertEqual(
+            "PyBGEN({:,d} samples; {:,d} variants)".format(
+                self.probs_truths["nb_samples"],
+                self.probs_truths["nb_variants"],
+            ),
+            str(self.bgen_probs),
+        )
+
     def test_nb_samples(self):
         """Tests the number of samples."""
-        self.assertEqual(self.truths["nb_samples"], self.bgen.nb_samples)
+        self.assertEqual(self.dosage_truths["nb_samples"],
+                         self.bgen.nb_samples)
+
+    def test_nb_samples_probs(self):
+        """Tests the number of samples (probs)."""
+        self.assertEqual(self.probs_truths["nb_samples"],
+                         self.bgen_probs.nb_samples)
 
     def test_nb_variants(self):
         """Tests the number of variants."""
-        self.assertEqual(self.truths["nb_variants"], self.bgen.nb_variants)
+        self.assertEqual(self.dosage_truths["nb_variants"],
+                         self.bgen.nb_variants)
+
+    def test_nb_variants_probs(self):
+        """Tests the number of variants (probs)."""
+        self.assertEqual(self.probs_truths["nb_variants"],
+                         self.bgen_probs.nb_variants)
 
     def test_samples(self):
         """Tests the samples attribute."""
-        if self.truths["samples"] is None:
+        if self.dosage_truths["samples"] is None:
             self.assertTrue(self.bgen.samples is None)
         else:
-            self.assertEqual(self.truths["samples"], self.bgen.samples)
+            self.assertEqual(self.dosage_truths["samples"], self.bgen.samples)
+
+    def test_samples_probs(self):
+        """Tests the samples attribute (probs)."""
+        if self.probs_truths["samples"] is None:
+            self.assertTrue(self.bgen_probs.samples is None)
+        else:
+            self.assertEqual(self.probs_truths["samples"],
+                             self.bgen_probs.samples)
 
     def test_get_first_variant(self):
         """Tests getting the first variant of the file."""
@@ -107,13 +141,34 @@ class ReaderTests(unittest.TestCase):
 
         # Checking the variant
         self._compare_variant(
-            self.truths["variants"][name]["variant"],
+            self.dosage_truths["variants"][name]["variant"],
             variant,
         )
 
         # Checking the dosage
         np.testing.assert_array_almost_equal(
-            self.truths["variants"][name]["dosage"], dosage,
+            self.dosage_truths["variants"][name]["dosage"], dosage,
+        )
+
+    def test_get_first_variant_probs(self):
+        """Tests getting the first variant of the file (probs)."""
+        # The variant to retrieve
+        name = "RSID_2"
+
+        # Getting the results (there should be only one
+        r = self.bgen_probs.get_variant(name)
+        self.assertEqual(1, len(r))
+        variant, probs = r.pop()
+
+        # Checking the variant
+        self._compare_variant(
+            self.probs_truths["variants"][name]["variant"],
+            variant,
+        )
+
+        # Checking the dosage
+        np.testing.assert_array_almost_equal(
+            self.probs_truths["variants"][name]["probs"], probs,
         )
 
     def test_get_middle_variant(self):
@@ -128,13 +183,34 @@ class ReaderTests(unittest.TestCase):
 
         # Checking the variant
         self._compare_variant(
-            self.truths["variants"][name]["variant"],
+            self.dosage_truths["variants"][name]["variant"],
             variant,
         )
 
         # Checking the dosage
         np.testing.assert_array_almost_equal(
-            self.truths["variants"][name]["dosage"], dosage,
+            self.dosage_truths["variants"][name]["dosage"], dosage,
+        )
+
+    def test_get_middle_variant_probs(self):
+        """Tests getting a variant in the middle of the file (probs)."""
+        # The variant to retrieve
+        name = "RSID_148"
+
+        # Getting the results (there should be only one
+        r = self.bgen_probs.get_variant(name)
+        self.assertEqual(1, len(r))
+        variant, probs = r.pop()
+
+        # Checking the variant
+        self._compare_variant(
+            self.probs_truths["variants"][name]["variant"],
+            variant,
+        )
+
+        # Checking the dosage
+        np.testing.assert_array_almost_equal(
+            self.probs_truths["variants"][name]["probs"], probs,
         )
 
     def test_get_last_variant(self):
@@ -149,19 +225,49 @@ class ReaderTests(unittest.TestCase):
 
         # Checking the variant
         self._compare_variant(
-            self.truths["variants"][name]["variant"],
+            self.dosage_truths["variants"][name]["variant"],
             variant,
         )
 
         # Checking the dosage
         np.testing.assert_array_almost_equal(
-            self.truths["variants"][name]["dosage"], dosage,
+            self.dosage_truths["variants"][name]["dosage"], dosage,
+        )
+
+    def test_get_last_variant_probs(self):
+        """Tests getting the last variant of the file (probs)."""
+        # The variant to retrieve
+        name = "RSID_200"
+
+        # Getting the results (there should be only one
+        r = self.bgen_probs.get_variant(name)
+        self.assertEqual(1, len(r))
+        variant, probs = r.pop()
+
+        # Checking the variant
+        self._compare_variant(
+            self.probs_truths["variants"][name]["variant"],
+            variant,
+        )
+
+        # Checking the dosage
+        np.testing.assert_array_almost_equal(
+            self.probs_truths["variants"][name]["probs"], probs,
         )
 
     def test_get_missing_variant(self):
         """Tests getting a variant which is absent from the BGEN file."""
         with self.assertRaises(ValueError) as cm:
             self.bgen.get_variant("UNKOWN_VARIANT_NAME")
+        self.assertEqual(
+            "UNKOWN_VARIANT_NAME: name not found",
+            str(cm.exception),
+        )
+
+    def test_get_missing_variant_probs(self):
+        """Tests getting a variant which is absent from the BGEN file."""
+        with self.assertRaises(ValueError) as cm:
+            self.bgen_probs.get_variant("UNKOWN_VARIANT_NAME")
         self.assertEqual(
             "UNKOWN_VARIANT_NAME: name not found",
             str(cm.exception),
@@ -177,17 +283,39 @@ class ReaderTests(unittest.TestCase):
 
             # Comparing the variant
             self._compare_variant(
-                self.truths["variants"][name]["variant"],
+                self.dosage_truths["variants"][name]["variant"],
                 variant,
             )
 
             # Comparing the dosage
             np.testing.assert_array_almost_equal(
-                self.truths["variants"][name]["dosage"], dosage,
+                self.dosage_truths["variants"][name]["dosage"], dosage,
             )
 
         # Checking if we checked all variants
-        self.assertEqual(seen_variants, self.truths["variant_set"])
+        self.assertEqual(seen_variants, self.dosage_truths["variant_set"])
+
+    def test_iter_all_variants_probs(self):
+        """Tests the iteration of all variants (probs)."""
+        seen_variants = set()
+        for variant, probs in self.bgen_probs.iter_variants():
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.probs_truths["variants"][name]["variant"],
+                variant,
+            )
+
+            # Comparing the dosage
+            np.testing.assert_array_almost_equal(
+                self.probs_truths["variants"][name]["probs"], probs,
+            )
+
+        # Checking if we checked all variants
+        self.assertEqual(seen_variants, self.probs_truths["variant_set"])
 
     def test_as_iterator(self):
         """Tests the module as iterator."""
@@ -199,17 +327,39 @@ class ReaderTests(unittest.TestCase):
 
             # Comparing the variant
             self._compare_variant(
-                self.truths["variants"][name]["variant"],
+                self.dosage_truths["variants"][name]["variant"],
                 variant,
             )
 
             # Comparing the dosage
             np.testing.assert_array_almost_equal(
-                self.truths["variants"][name]["dosage"], dosage,
+                self.dosage_truths["variants"][name]["dosage"], dosage,
             )
 
         # Checking if we checked all variants
-        self.assertEqual(seen_variants, self.truths["variant_set"])
+        self.assertEqual(seen_variants, self.dosage_truths["variant_set"])
+
+    def test_as_iterator_probs(self):
+        """Tests the module as iterator (probs)."""
+        seen_variants = set()
+        for variant, probs in self.bgen_probs:
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.probs_truths["variants"][name]["variant"],
+                variant,
+            )
+
+            # Comparing the dosage
+            np.testing.assert_array_almost_equal(
+                self.probs_truths["variants"][name]["probs"], probs,
+            )
+
+        # Checking if we checked all variants
+        self.assertEqual(seen_variants, self.probs_truths["variant_set"])
 
     def test_iter_variant_info(self):
         """Tests the iteration of all variants' information."""
@@ -221,12 +371,29 @@ class ReaderTests(unittest.TestCase):
 
             # Comparing the variant
             self._compare_variant(
-                self.truths["variants"][name]["variant"],
+                self.dosage_truths["variants"][name]["variant"],
                 variant,
             )
 
         # Checking if we checked all variants
-        self.assertEqual(seen_variants, self.truths["variant_set"])
+        self.assertEqual(seen_variants, self.dosage_truths["variant_set"])
+
+    def test_iter_variant_info_probs(self):
+        """Tests the iteration of all variants' information (probs)."""
+        seen_variants = set()
+        for variant in self.bgen_probs.iter_variant_info():
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.probs_truths["variants"][name]["variant"],
+                variant,
+            )
+
+        # Checking if we checked all variants
+        self.assertEqual(seen_variants, self.probs_truths["variant_set"])
 
     def test_iter_variants_in_region(self):
         """Tests the iteration of all variants in a genomic region."""
@@ -239,19 +406,48 @@ class ReaderTests(unittest.TestCase):
 
             # Comparing the variant
             self._compare_variant(
-                self.truths["variants"][name]["variant"],
+                self.dosage_truths["variants"][name]["variant"],
                 variant,
             )
 
             # Comparing the dosage
             np.testing.assert_array_almost_equal(
-                self.truths["variants"][name]["dosage"], dosage,
+                self.dosage_truths["variants"][name]["dosage"], dosage,
             )
 
         # Checking if we checked all variants
         expected = set()
-        for name in self.truths["variant_set"]:
-            variant = self.truths["variants"][name]["variant"]
+        for name in self.dosage_truths["variant_set"]:
+            variant = self.dosage_truths["variants"][name]["variant"]
+            if variant.chrom == "01":
+                if variant.pos >= 67000 and variant.pos <= 70999:
+                    expected.add(name)
+        self.assertEqual(seen_variants, expected)
+
+    def test_iter_variants_in_region_probs(self):
+        """Tests the iteration of all variants in a genomic region (probs)."""
+        seen_variants = set()
+        iterator = self.bgen_probs.iter_variants_in_region("01", 67000, 70999)
+        for variant, probs in iterator:
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.probs_truths["variants"][name]["variant"],
+                variant,
+            )
+
+            # Comparing the dosage
+            np.testing.assert_array_almost_equal(
+                self.probs_truths["variants"][name]["probs"], probs,
+            )
+
+        # Checking if we checked all variants
+        expected = set()
+        for name in self.probs_truths["variant_set"]:
+            variant = self.probs_truths["variants"][name]["variant"]
             if variant.chrom == "01":
                 if variant.pos >= 67000 and variant.pos <= 70999:
                     expected.add(name)
@@ -274,13 +470,42 @@ class ReaderTests(unittest.TestCase):
 
             # Comparing the variant
             self._compare_variant(
-                self.truths["variants"][name]["variant"],
+                self.dosage_truths["variants"][name]["variant"],
                 variant,
             )
 
             # Comparing the dosage
             np.testing.assert_array_almost_equal(
-                self.truths["variants"][name]["dosage"], dosage,
+                self.dosage_truths["variants"][name]["dosage"], dosage,
+            )
+
+        # Checking if we checked all variants
+        self.assertEqual(seen_variants, {_[0] for _ in seeks})
+
+    def test_iter_seeks_probs(self):
+        """Tests the _iter_seeks function (probs)."""
+        # Fetching random seeks from the index
+        self.bgen_probs._bgen_index.execute(
+            "SELECT rsid, file_start_position FROM Variant"
+        )
+        seeks = random.sample(self.bgen_probs._bgen_index.fetchall(), 5)
+
+        seen_variants = set()
+        iterator = self.bgen_probs._iter_seeks([_[1] for _ in seeks])
+        for variant, probs in iterator:
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.probs_truths["variants"][name]["variant"],
+                variant,
+            )
+
+            # Comparing the dosage
+            np.testing.assert_array_almost_equal(
+                self.probs_truths["variants"][name]["probs"], probs,
             )
 
         # Checking if we checked all variants
@@ -290,42 +515,50 @@ class ReaderTests(unittest.TestCase):
 class Test32bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.32bits.bgen")
     truth_filename = "example.32bits.truths.txt.bz2"
+    probs_truth_filename = "example.32bits.probs.truths.txt.bz2"
 
 
 class Test24bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.24bits.bgen")
     truth_filename = "example.24bits.truths.txt.bz2"
+    probs_truth_filename = "example.24bits.probs.truths.txt.bz2"
 
 
 class Test16bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.16bits.bgen")
     truth_filename = "example.16bits.truths.txt.bz2"
+    probs_truth_filename = "example.16bits.probs.truths.txt.bz2"
 
 
 @unittest.skipIf(not pybgen.HAS_ZSTD, "module 'zstandard' not installed")
 class Test16bitsZstd(ReaderTests):
     bgen_filename = os.path.join("data", "example.16bits.zstd.bgen")
     truth_filename = "example.16bits.zstd.truths.txt.bz2"
+    probs_truth_filename = "example.16bits.zstd.probs.truths.txt.bz2"
 
 
 class Test9bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.9bits.bgen")
     truth_filename = "example.9bits.truths.txt.bz2"
+    probs_truth_filename = "example.9bits.probs.truths.txt.bz2"
 
 
 class Test8bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.8bits.bgen")
     truth_filename = "example.8bits.truths.txt.bz2"
+    probs_truth_filename = "example.8bits.probs.truths.txt.bz2"
 
 
 class Test3bits(ReaderTests):
     bgen_filename = os.path.join("data", "example.3bits.bgen")
     truth_filename = "example.3bits.truths.txt.bz2"
+    probs_truth_filename = "example.3bits.probs.truths.txt.bz2"
 
 
 class TestLayout1(ReaderTests):
     bgen_filename = os.path.join("data", "cohort1.bgen")
     truth_filename = "cohort1.truths.txt.bz2"
+    probs_truth_filename = "cohort1.probs.truths.txt.bz2"
 
 
 reader_tests = (Test32bits, Test24bits, Test16bits, Test16bitsZstd, Test9bits,
