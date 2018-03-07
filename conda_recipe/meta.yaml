@@ -1,7 +1,7 @@
 # Created using the meta.yaml file automatically created using conda-build
 # bdist_conda tool
 
-{% set version = "0.4.2" %}
+{% set version = "0.5.0" %}
 
 package:
     name: pybgen
