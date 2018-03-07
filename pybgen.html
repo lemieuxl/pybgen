@@ -4,9 +4,9 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pybgen’s API &#8212; pybgen 0.4.2 documentation</title>
+    <title>pybgen’s API &#8212; pybgen 0.5.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" src="_static/documentation_options.js"></script>
@@ -81,7 +81,7 @@
 <h2>Main PyBGEN class<a class="headerlink" href="#main-pybgen-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pybgen.PyBGEN">
-<em class="property">class </em><code class="descclassname">pybgen.</code><code class="descname">PyBGEN</code><span class="sig-paren">(</span><em>fn</em>, <em>mode='r'</em>, <em>prob_t=0.9</em>, <em>_skip_index=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pybgen.</code><code class="descname">PyBGEN</code><span class="sig-paren">(</span><em>fn</em>, <em>mode='r'</em>, <em>prob_t=0.9</em>, <em>_skip_index=False</em>, <em>probs_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads and store a set of BGEN files.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -91,6 +91,7 @@
 <li><strong>fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The name of the BGEN file.</li>
 <li><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The open mode for the BGEN file.</li>
 <li><strong>prob_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – The probability threshold (optional).</li>
+<li><strong>probs_only</strong> (<em>boolean</em>) – Return only the probabilities instead of dosage.</li>
 </ul>
 </td>
 </tr>
@@ -258,10 +259,11 @@ information about the tests.</p>
 <div class="section" id="parallel-pybgen-class">
 <h2>Parallel PyBGEN class<a class="headerlink" href="#parallel-pybgen-class" title="Permalink to this headline">¶</a></h2>
 <p>We provide a wrapper class called <a class="reference internal" href="#pybgen.ParallelPyBGEN" title="pybgen.ParallelPyBGEN"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelPyBGEN</span></code></a> which implements
-two functions to iterate over variants in parallel.</p>
+two functions to iterate over variants in parallel. This is useful for huge
+datasets such as the UK Biobank imputation files.</p>
 <dl class="class">
 <dt id="pybgen.ParallelPyBGEN">
-<em class="property">class </em><code class="descclassname">pybgen.</code><code class="descname">ParallelPyBGEN</code><span class="sig-paren">(</span><em>fn</em>, <em>prob_t=0.9</em>, <em>cpus=2</em>, <em>max_variants=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pybgen.</code><code class="descname">ParallelPyBGEN</code><span class="sig-paren">(</span><em>fn</em>, <em>prob_t=0.9</em>, <em>cpus=2</em>, <em>probs_only=False</em>, <em>max_variants=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads BGEN files in parallel.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -271,6 +273,7 @@ two functions to iterate over variants in parallel.</p>
 <li><strong>fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The name of the BGEN file.</li>
 <li><strong>prob_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – The probability threshold (optional).</li>
 <li><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The number of CPUs (default is 2).</li>
+<li><strong>probs_only</strong> (<em>boolean</em>) – Return only the probabilities instead of dosage.</li>
 <li><strong>max_variants</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The maximal number of variants in the Queue</li>
 </ul>
 </td>
@@ -320,7 +323,7 @@ two functions to iterate over variants in parallel.</p>
       &copy;2017, Louis-Philippe Lemieux Perreault.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
