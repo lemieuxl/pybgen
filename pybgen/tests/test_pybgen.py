@@ -24,10 +24,8 @@
 
 
 import os
-import shutil
 import random
 import unittest
-from tempfile import mkdtemp
 
 import numpy as np
 from pkg_resources import resource_filename
@@ -41,11 +39,6 @@ __all__ = ["reader_tests"]
 
 class ReaderTests(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        # Creating a temporary directory
-        cls.tmp_dir = mkdtemp(prefix="pybgen_test_")
-
     def setUp(self):
         # Getting the truth for this file
         self.truths = truths["dosage"][self.truth_filename]
@@ -53,11 +46,6 @@ class ReaderTests(unittest.TestCase):
         # Reading the BGEN files
         bgen_fn = resource_filename(__name__, self.bgen_filename)
         self.bgen = pybgen.PyBGEN(bgen_fn)
-
-    @classmethod
-    def tearDownClass(cls):
-        # Cleaning the temporary directory
-        shutil.rmtree(cls.tmp_dir)
 
     def tearDown(self):
         # Closing the object
