@@ -272,6 +272,15 @@ class ReaderTests(unittest.TestCase):
                     expected.add(name)
         self.assertEqual(seen_variants, expected)
 
+    def test_get_missing_specific_variant(self):
+        """Tests getting a specific variant which is absent from the file."""
+        with self.assertRaises(ValueError) as cm:
+            self.bgen.get_specific_variant("01", 67000, "A", "T")
+        self.assertEqual(
+            "01:67000 A/T: variant not found",
+            str(cm.exception),
+        )
+
     def test_iter_seeks(self):
         """Tests the _iter_seeks function."""
         # Fetching random seeks from the index

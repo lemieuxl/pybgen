@@ -276,12 +276,17 @@ class PyBGEN(object):
             ref (str): The reference allele.
             alt (str): The alternative allele.
 
+        Returns:
+            list: A list containing all the value for a given variant. The list
+            has more than one item if there are duplicated variants.
+
         """
         # Getting the region from the index file
         self._bgen_index.execute(
             "SELECT file_start_position "
             "FROM Variant "
-            "WHERE chromosome = ? AND position = ? AND allele1 = ? AND allele2 = ?",
+            "WHERE chromosome = ? AND position = ? AND allele1 = ? AND "
+            "      allele2 = ?",
             (chrom, pos, ref, alt),
         )
 
@@ -289,9 +294,16 @@ class PyBGEN(object):
         seek_positions = [_[0] for _ in self._bgen_index.fetchall()]
 
         # Fetching seek positions, we return the variant
+        results = []
         for seek_pos in seek_positions:
             self._bgen.seek(seek_pos)
-            yield self._read_current_variant()
+            results.append(self._read_current_variant())
+
+        if not results:
+            raise ValueError("{}:{} {}/{}: variant not found"
+                             "".format(chrom, pos, ref, alt))
+
+        return results
 
     def iter_variant_info(self):
         """Iterate over marker information."""
