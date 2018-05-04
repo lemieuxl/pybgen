@@ -267,6 +267,32 @@ class PyBGEN(object):
             self._bgen.seek(seek_pos)
             yield self._read_current_variant()
 
+    def get_specific_variant(self, chrom, pos, ref, alt):
+        """Get specific variant with allele lookup
+
+        Args:
+            chrom (str): The name of the chromosome.
+            pos (int): The starting position of the region.
+            ref (str): The reference allele.
+            alt (str): The alternative allele.
+
+        """
+        # Getting the region from the index file
+        self._bgen_index.execute(
+            "SELECT file_start_position "
+            "FROM Variant "
+            "WHERE chromosome = ? AND position = ? AND allele1 = ? AND allele2 = ?",
+            (chrom, pos, ref, alt),
+        )
+
+        # Fetching all the seek positions
+        seek_positions = [_[0] for _ in self._bgen_index.fetchall()]
+
+        # Fetching seek positions, we return the variant
+        for seek_pos in seek_positions:
+            self._bgen.seek(seek_pos)
+            yield self._read_current_variant()
+
     def iter_variant_info(self):
         """Iterate over marker information."""
         self._bgen_index.execute(

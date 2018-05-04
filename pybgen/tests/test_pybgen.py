@@ -244,6 +244,34 @@ class ReaderTests(unittest.TestCase):
                     expected.add(name)
         self.assertEqual(seen_variants, expected)
 
+    def test_get_specific_variant(self):
+        """Test for specific variant lookup."""
+        seen_variants = set()
+        iterator = self.bgen.get_specific_variant("01", 67000, "A", "G")
+        for variant, dosage in iterator:
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.truths["variants"][name]["variant"], variant,
+            )
+
+            # Comparing the dosage
+            np.testing.assert_array_almost_equal(
+                self.truths["variants"][name]["data"], dosage,
+            )
+
+        # Checking if we checked all variants
+        expected = set()
+        for name in self.truths["variant_set"]:
+            variant = self.truths["variants"][name]["variant"]
+            if variant.chrom == "01":
+                if variant.pos == 67000:
+                    expected.add(name)
+        self.assertEqual(seen_variants, expected)
+
     def test_iter_seeks(self):
         """Tests the _iter_seeks function."""
         # Fetching random seeks from the index
