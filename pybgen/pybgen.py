@@ -132,7 +132,7 @@ class PyBGEN(object):
             self._bgen.seek(self._first_variant_block)
 
         elif self._mode == "w":
-            raise NotImplemented("'w' mode not yet implemented")
+            raise NotImplementedError("'w' mode not yet implemented")
 
         else:
             raise ValueError("invalid mode: '{}'".format(self._mode))
