@@ -309,6 +309,35 @@ class ReaderTests(unittest.TestCase):
         # Checking if we checked all variants
         self.assertEqual(seen_variants, {_[0] for _ in seeks})
 
+    def test_iter_variants_by_name(self):
+        """Tests the iteration of variants by name."""
+        # Fetching random variants in the index
+        self.bgen._bgen_index.execute("SELECT rsid FROM Variant")
+        names = [
+            _[0] for _ in random.sample(self.bgen._bgen_index.fetchall(), 5)
+        ]
+
+        seen_variants = set()
+        iterator = self.bgen.iter_variants_by_names(names)
+        for variant, dosage in iterator:
+            # The name of the variant
+            name = variant.name
+            seen_variants.add(name)
+
+            # Comparing the variant
+            self._compare_variant(
+                self.truths["variants"][name]["variant"],
+                variant,
+            )
+
+            # Comparing the dosage
+            np.testing.assert_array_almost_equal(
+                self.truths["variants"][name]["data"], dosage,
+            )
+
+        # Checking if we checked all variants
+        self.assertEqual(seen_variants, set(names))
+
 
 class ProbsReaderTests(ReaderTests):
 
