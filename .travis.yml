@@ -1,14 +1,17 @@
 language: python
+
 python:
   - "2.7"
   - "3.6"
   - "3.7"
   - "3.8"
+
 install:
   - pip install -U pip setuptools
-  - pip install -U six numpy zstandard coveralls
-  - pip list
+  - pip install -U tox tox-venv tox-travis
+
 script:
-  - coverage run setup.py test
+  - tox
+
 after_success:
   - coveralls

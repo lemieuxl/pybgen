@@ -2,6 +2,7 @@
 *.swo
 *~
 *.pyc
+
 dist
 conda_dist
 *.egg-info
@@ -9,6 +10,7 @@ test
 pybgen/version.py
 
 .coverage
+.tox
 htmlcov
 
 .ipynb_checkpoints
