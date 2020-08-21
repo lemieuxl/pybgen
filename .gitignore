@@ -5,10 +5,11 @@
 
 dist
 conda_dist
+
 *.egg-info
-test
 pybgen/version.py
 
+test
 .coverage
 .tox
 htmlcov
