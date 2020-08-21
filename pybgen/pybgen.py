@@ -262,10 +262,19 @@ class PyBGEN(object):
         # Fetching all the seek positions
         seek_positions = [_[0] for _ in self._bgen_index.fetchall()]
 
-        # Fetching seek positions, we return the variant
-        for seek_pos in seek_positions:
-            self._bgen.seek(seek_pos)
-            yield self._read_current_variant()
+        return self._iter_seeks(seek_positions)
+
+    def iter_variants_by_names(self, names):
+        """Iterates over variants using a list of names.
+
+        Args:
+            names (list): A list of names to extract specific variants.
+
+        """
+        # Fetching all the seek positions
+        seek_positions = self._get_seeks_for_names(names)
+
+        return self._iter_seeks(seek_positions)
 
     def get_specific_variant(self, chrom, pos, ref, alt):
         """Get specific variant with allele lookup
@@ -294,10 +303,7 @@ class PyBGEN(object):
         seek_positions = [_[0] for _ in self._bgen_index.fetchall()]
 
         # Fetching seek positions, we return the variant
-        results = []
-        for seek_pos in seek_positions:
-            self._bgen.seek(seek_pos)
-            results.append(self._read_current_variant())
+        results = list(self._iter_seeks(seek_positions))
 
         if not results:
             raise ValueError("{}:{} {}/{}: variant not found"
@@ -327,6 +333,24 @@ class PyBGEN(object):
             self._bgen.seek(seek)
             yield self._read_current_variant()
 
+    def _get_seeks_for_names(self, names):
+        """Gets the seek values for each names."""
+        # Generating a temporary table that will contain the markers to extract
+        self._bgen_index.execute("CREATE TEMPORARY TABLE tnames (name text)")
+        self._bgen_index.executemany(
+            "INSERT INTO tnames VALUES (?)",
+            [(n, ) for n in names],
+        )
+
+        # Fetching the seek positions
+        self._bgen_index.execute(
+            "SELECT file_start_position "
+            "FROM Variant "
+            "WHERE rsid IN (SELECT name FROM tnames)",
+        )
+
+        return tuple(_[0] for _ in self._bgen_index.fetchall())
+
     def get_variant(self, name):
         """Gets the values for a given variant.
 
@@ -351,10 +375,7 @@ class PyBGEN(object):
         seek_positions = [_[0] for _ in self._bgen_index.fetchall()]
 
         # Constructing the results
-        results = []
-        for seek_pos in seek_positions:
-            self._bgen.seek(seek_pos)
-            results.append(self._read_current_variant())
+        results = list(self._iter_seeks(seek_positions))
 
         if not results:
             raise ValueError("{}: name not found".format(name))
@@ -487,8 +508,7 @@ class PyBGEN(object):
         is_phased = data[0] == 1
         if is_phased:
             raise ValueError(
-                "{}: only accepting unphased "
-                "data".format(self._bgen.name)
+                "{}: only accepting unphased data".format(self._bgen.name)
             )
         data = data[1:]
 
