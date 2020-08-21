@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pybgen.pybgen &#8212; pybgen 0.6.0 documentation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pybgen.pybgen &#8212; pybgen 0.7.0 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -56,21 +55,29 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for pybgen.pybgen</h1><div class="highlight"><pre>
@@ -101,20 +108,20 @@
 <span class="c1"># THE SOFTWARE.</span>
 
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">zlib</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sqlite3</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">ceil</span>
-<span class="kn">from</span> <span class="nn">struct</span> <span class="k">import</span> <span class="n">unpack</span>
-<span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">UnsupportedOperation</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">unpack</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">UnsupportedOperation</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="nb">range</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">zstd</span>
@@ -142,14 +149,14 @@
 <span class="k">class</span> <span class="nc">_Variant</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;chrom&quot;</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">,</span> <span class="s2">&quot;a1&quot;</span><span class="p">,</span> <span class="s2">&quot;a2&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chrom</span> <span class="o">=</span> <span class="n">chrom</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">a1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">a2</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;Variant </span><span class="si">{}</span><span class="s2"> chr</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">,</span>
         <span class="p">)</span>
@@ -176,7 +183,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">prob_t</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">_skip_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">prob_t</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">_skip_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">probs_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initializes a new PyBGEN instance.&quot;&quot;&quot;</span>
         <span class="c1"># The mode</span>
@@ -208,12 +215,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_first_variant_block</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s2">&quot;&#39;w&#39; mode not yet implemented&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&#39;w&#39; mode not yet implemented&quot;</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid mode: &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mode</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The representation of the PyBGEN object.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;PyBGEN(</span><span class="si">{:,d}</span><span class="s2"> samples; </span><span class="si">{:,d}</span><span class="s2"> variants)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -222,22 +229,22 @@
 
         <span class="k">return</span> <span class="s1">&#39;PyBGEN(mode=&quot;w&quot;)&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The __iter__ function.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">!=</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">UnsupportedOperation</span><span class="p">(</span><span class="s2">&quot;not available in &#39;w&#39; mode&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The __next__ function.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Entering the context manager.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Exiting the context manager.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
@@ -338,10 +345,19 @@
         <span class="c1"># Fetching all the seek positions</span>
         <span class="n">seek_positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
 
-        <span class="c1"># Fetching seek positions, we return the variant</span>
-        <span class="k">for</span> <span class="n">seek_pos</span> <span class="ow">in</span> <span class="n">seek_positions</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_pos</span><span class="p">)</span>
-            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iter_seeks</span><span class="p">(</span><span class="n">seek_positions</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PyBGEN.iter_variants_by_names"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.iter_variants_by_names">[docs]</a>    <span class="k">def</span> <span class="nf">iter_variants_by_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterates over variants using a list of names.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            names (list): A list of names to extract specific variants.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Fetching all the seek positions</span>
+        <span class="n">seek_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_seeks_for_names</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iter_seeks</span><span class="p">(</span><span class="n">seek_positions</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PyBGEN.get_specific_variant"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.get_specific_variant">[docs]</a>    <span class="k">def</span> <span class="nf">get_specific_variant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="n">alt</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get specific variant with allele lookup</span>
@@ -370,10 +386,7 @@
         <span class="n">seek_positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
 
         <span class="c1"># Fetching seek positions, we return the variant</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">seek_pos</span> <span class="ow">in</span> <span class="n">seek_positions</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_pos</span><span class="p">)</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">())</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iter_seeks</span><span class="p">(</span><span class="n">seek_positions</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">: variant not found&quot;</span>
@@ -403,6 +416,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek</span><span class="p">)</span>
             <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">()</span>
 
+    <span class="k">def</span> <span class="nf">_get_seeks_for_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets the seek values for each names.&quot;&quot;&quot;</span>
+        <span class="c1"># Generating a temporary table that will contain the markers to extract</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;CREATE TEMPORARY TABLE tnames (name text)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span>
+            <span class="s2">&quot;INSERT INTO tnames VALUES (?)&quot;</span><span class="p">,</span>
+            <span class="p">[(</span><span class="n">n</span><span class="p">,</span> <span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fetching the seek positions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT file_start_position &quot;</span>
+            <span class="s2">&quot;FROM Variant &quot;</span>
+            <span class="s2">&quot;WHERE rsid IN (SELECT name FROM tnames)&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchall</span><span class="p">())</span>
+
 <div class="viewcode-block" id="PyBGEN.get_variant"><a class="viewcode-back" href="../../pybgen.html#pybgen.PyBGEN.get_variant">[docs]</a>    <span class="k">def</span> <span class="nf">get_variant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Gets the values for a given variant.</span>
 
@@ -427,10 +458,7 @@
         <span class="n">seek_positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgen_index</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
 
         <span class="c1"># Constructing the results</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">seek_pos</span> <span class="ow">in</span> <span class="n">seek_positions</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_pos</span><span class="p">)</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_current_variant</span><span class="p">())</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iter_seeks</span><span class="p">(</span><span class="n">seek_positions</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: name not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
@@ -563,8 +591,7 @@
         <span class="n">is_phased</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">is_phased</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: only accepting unphased &quot;</span>
-                <span class="s2">&quot;data&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: only accepting unphased data&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bgen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 
@@ -857,6 +884,7 @@
 </pre></div>
 
           </div>
+          
         </div>
       </div>
     <div class="clearer"></div>
@@ -865,8 +893,8 @@
       &copy;2017, Louis-Philippe Lemieux Perreault.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

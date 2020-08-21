@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pybgen’s API &#8212; pybgen 0.6.0 documentation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pybgen’s API &#8212; pybgen 0.7.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Installation" href="installation.html" />
@@ -58,45 +57,49 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="pybgen-s-api">
 <h1>pybgen’s API<a class="headerlink" href="#pybgen-s-api" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="main-pybgen-class">
 <h2>Main PyBGEN class<a class="headerlink" href="#main-pybgen-class" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="pybgen.PyBGEN">
-<em class="property">class </em><code class="descclassname">pybgen.</code><code class="descname">PyBGEN</code><span class="sig-paren">(</span><em>fn</em>, <em>mode='r'</em>, <em>prob_t=0.9</em>, <em>_skip_index=False</em>, <em>probs_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pybgen.</code><code class="sig-name descname">PyBGEN</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fn</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'r'</span></em>, <em class="sig-param"><span class="n">prob_t</span><span class="o">=</span><span class="default_value">0.9</span></em>, <em class="sig-param"><span class="n">_skip_index</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">probs_only</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads and store a set of BGEN files.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The name of the BGEN file.</li>
-<li><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The open mode for the BGEN file.</li>
-<li><strong>prob_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – The probability threshold (optional).</li>
-<li><strong>probs_only</strong> (<em>boolean</em>) – Return only the probabilities instead of dosage.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the BGEN file.</p></li>
+<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The open mode for the BGEN file.</p></li>
+<li><p><strong>prob_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The probability threshold (optional).</p></li>
+<li><p><strong>probs_only</strong> (<em>boolean</em>) – Return only the probabilities instead of dosage.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <p>Reads or write BGEN files.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pybgen</span> <span class="kn">import</span> <span class="n">PyBGEN</span>
 
@@ -105,179 +108,168 @@
     <span class="k">pass</span>
 </pre></div>
 </div>
-<dl class="method">
+<dl class="py method">
 <dt id="pybgen.PyBGEN.close">
-<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.close" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Closes the BGEN object.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pybgen.PyBGEN.get_specific_variant">
-<code class="descname">get_specific_variant</code><span class="sig-paren">(</span><em>chrom</em>, <em>pos</em>, <em>ref</em>, <em>alt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.get_specific_variant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.get_specific_variant" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_specific_variant</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">chrom</span></em>, <em class="sig-param"><span class="n">pos</span></em>, <em class="sig-param"><span class="n">ref</span></em>, <em class="sig-param"><span class="n">alt</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.get_specific_variant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.get_specific_variant" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get specific variant with allele lookup</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>chrom</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The name of the chromosome.</li>
-<li><strong>pos</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The starting position of the region.</li>
-<li><strong>ref</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The reference allele.</li>
-<li><strong>alt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The alternative allele.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chrom</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the chromosome.</p></li>
+<li><p><strong>pos</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The starting position of the region.</p></li>
+<li><p><strong>ref</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The reference allele.</p></li>
+<li><p><strong>alt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The alternative allele.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list containing all the value for a given variant. The list
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list containing all the value for a given variant. The list
 has more than one item if there are duplicated variants.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)">list</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pybgen.PyBGEN.get_variant">
-<code class="descname">get_variant</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.get_variant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.get_variant" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_variant</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.get_variant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.get_variant" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the values for a given variant.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The name of the variant.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list containing all the value for a given variant. The list
-has more than one item if there are duplicated variants.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)">list</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the variant.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list containing all the value for a given variant. The list
+has more than one item if there are duplicated variants.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pybgen.PyBGEN.iter_variant_info">
-<code class="descname">iter_variant_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.iter_variant_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.iter_variant_info" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">iter_variant_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.iter_variant_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.iter_variant_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterate over marker information.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pybgen.PyBGEN.iter_variants">
-<code class="descname">iter_variants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.iter_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.iter_variants" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">iter_variants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.iter_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.iter_variants" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterates over variants from the beginning of the BGEN file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A variant and the dosage.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.6)">tuple</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A variant and the dosage.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="pybgen.PyBGEN.iter_variants_by_names">
+<code class="sig-name descname">iter_variants_by_names</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">names</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.iter_variants_by_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.iter_variants_by_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates over variants using a list of names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of names to extract specific variants.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="pybgen.PyBGEN.iter_variants_in_region">
-<code class="descname">iter_variants_in_region</code><span class="sig-paren">(</span><em>chrom</em>, <em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.iter_variants_in_region"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.iter_variants_in_region" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">iter_variants_in_region</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">chrom</span></em>, <em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">end</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.iter_variants_in_region"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.iter_variants_in_region" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterates over variants in a specific region.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>chrom</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The name of the chromosome.</li>
-<li><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The starting position of the region.</li>
-<li><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The ending position of the region.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chrom</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the chromosome.</p></li>
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The starting position of the region.</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The ending position of the region.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="pybgen.PyBGEN.nb_samples">
-<code class="descname">nb_samples</code><a class="headerlink" href="#pybgen.PyBGEN.nb_samples" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">nb_samples</code><a class="headerlink" href="#pybgen.PyBGEN.nb_samples" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the number of samples.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The number of samples in the dataset.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)">int</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The number of samples in the dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="pybgen.PyBGEN.nb_variants">
-<code class="descname">nb_variants</code><a class="headerlink" href="#pybgen.PyBGEN.nb_variants" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">nb_variants</code><a class="headerlink" href="#pybgen.PyBGEN.nb_variants" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the number of markers.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The number of markers in the dataset.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)">int</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The number of markers in the dataset.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pybgen.PyBGEN.next">
-<code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.next" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/pybgen.html#PyBGEN.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.PyBGEN.next" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the next variant.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The variant’s information and its genotypes (dosage) as
-<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.6)">tuple</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The variant’s information and its genotypes (dosage) as
+<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="pybgen.PyBGEN.samples">
-<code class="descname">samples</code><a class="headerlink" href="#pybgen.PyBGEN.samples" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">samples</code><a class="headerlink" href="#pybgen.PyBGEN.samples" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the samples.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The samples.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.6)">tuple</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The samples.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <span class="target" id="module-pybgen"></span><p>A module to read BGEN files.</p>
-<dl class="function">
+<dl class="py function">
 <dt id="pybgen.test">
-<code class="descclassname">pybgen.</code><code class="descname">test</code><span class="sig-paren">(</span><em>verbosity=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen.html#test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.test" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pybgen.</code><code class="sig-name descname">test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">verbosity</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen.html#test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.test" title="Permalink to this definition">¶</a></dt>
 <dd><p>Executes all the tests for pybgen.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The verbosity level for <a class="reference external" href="https://docs.python.org/3/library/unittest.html#module-unittest" title="(in Python v3.6)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unittest</span></code></a>.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>verbosity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The verbosity level for <a class="reference external" href="https://docs.python.org/3/library/unittest.html#module-unittest" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unittest</span></code></a>.</p>
+</dd>
+</dl>
 <p>Just set <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> to an integer higher than <code class="docutils literal notranslate"><span class="pre">1</span></code> to have more
 information about the tests.</p>
 </dd></dl>
@@ -288,25 +280,21 @@ information about the tests.</p>
 <p>We provide a wrapper class called <a class="reference internal" href="#pybgen.ParallelPyBGEN" title="pybgen.ParallelPyBGEN"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelPyBGEN</span></code></a> which implements
 two functions to iterate over variants in parallel. This is useful for huge
 datasets such as the UK Biobank imputation files.</p>
-<dl class="class">
+<dl class="py class">
 <dt id="pybgen.ParallelPyBGEN">
-<em class="property">class </em><code class="descclassname">pybgen.</code><code class="descname">ParallelPyBGEN</code><span class="sig-paren">(</span><em>fn</em>, <em>prob_t=0.9</em>, <em>cpus=2</em>, <em>probs_only=False</em>, <em>max_variants=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pybgen.</code><code class="sig-name descname">ParallelPyBGEN</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fn</span></em>, <em class="sig-param"><span class="n">prob_t</span><span class="o">=</span><span class="default_value">0.9</span></em>, <em class="sig-param"><span class="n">cpus</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">probs_only</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">max_variants</span><span class="o">=</span><span class="default_value">1000</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads BGEN files in parallel.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The name of the BGEN file.</li>
-<li><strong>prob_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – The probability threshold (optional).</li>
-<li><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The number of CPUs (default is 2).</li>
-<li><strong>probs_only</strong> (<em>boolean</em>) – Return only the probabilities instead of dosage.</li>
-<li><strong>max_variants</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The maximal number of variants in the Queue</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fn</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the BGEN file.</p></li>
+<li><p><strong>prob_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The probability threshold (optional).</p></li>
+<li><p><strong>cpus</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of CPUs (default is 2).</p></li>
+<li><p><strong>probs_only</strong> (<em>boolean</em>) – Return only the probabilities instead of dosage.</p></li>
+<li><p><strong>max_variants</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The maximal number of variants in the Queue</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <p>Reads a BGEN file using multiple processes.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pybgen</span> <span class="kn">import</span> <span class="n">ParrallelPyBGEN</span> <span class="k">as</span> <span class="n">PyBGEN</span>
 
@@ -315,24 +303,21 @@ datasets such as the UK Biobank imputation files.</p>
     <span class="k">pass</span>
 </pre></div>
 </div>
-<dl class="method">
+<dl class="py method">
 <dt id="pybgen.ParallelPyBGEN.iter_variants">
-<code class="descname">iter_variants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN.iter_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN.iter_variants" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">iter_variants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN.iter_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN.iter_variants" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterates over all variants using multiple process.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pybgen.ParallelPyBGEN.iter_variants_by_names">
-<code class="descname">iter_variants_by_names</code><span class="sig-paren">(</span><em>names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN.iter_variants_by_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN.iter_variants_by_names" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">iter_variants_by_names</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">names</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pybgen/parallel.html#ParallelPyBGEN.iter_variants_by_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pybgen.ParallelPyBGEN.iter_variants_by_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterates over variants using a list of names.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a>) – A list of names to extract specific variants.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of names to extract specific variants.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -342,6 +327,7 @@ datasets such as the UK Biobank imputation files.</p>
 
 
           </div>
+          
         </div>
       </div>
     <div class="clearer"></div>
@@ -350,8 +336,8 @@ datasets such as the UK Biobank imputation files.</p>
       &copy;2017, Louis-Philippe Lemieux Perreault.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/pybgen.rst.txt"
