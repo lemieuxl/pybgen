@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
 # How to build source distribution
-#   - python setup.py sdist --format bztar
 #   - python setup.py sdist --format gztar
-#   - python setup.py sdist --format zip
 #   - python setup.py bdist_wheel --universal
 
 # How to build for conda
-#   - cd conda_recipe
-#   - conda clean -ytps; conda build purge; conda build --python $VERSION .
+#   - mkdir -p ./conda_skeleton && cd ./conda_skeleton
+#   - conda skeleton pypi pybgen --version $VERSION
+#   - conda build --python $PYTHON_VERSION pybgen
 #   - cp $FILE ../conda_dist/linux-64
 #   - conda convert -p all ../conda_dist/linux-64/$FILE -o ../conda_dist
-#   - cd ../conda_dist && conda index *
+#   - cd ../conda_dist && conda index .
+#   - cd .. && rm -rf ./conda_skeleton
 
 
 import os
@@ -19,7 +19,7 @@ from setuptools import setup
 
 
 MAJOR = 0
-MINOR = 6
+MINOR = 7
 MICRO = 0
 VERSION = "{}.{}.{}".format(MAJOR, MINOR, MICRO)
 
@@ -73,9 +73,9 @@ def setup_package():
                      "Programming Language :: Python",
                      "Programming Language :: Python :: 2.7",
                      "Programming Language :: Python :: 3",
-                     "Programming Language :: Python :: 3.4",
-                     "Programming Language :: Python :: 3.5",
                      "Programming Language :: Python :: 3.6",
+                     "Programming Language :: Python :: 3.7",
+                     "Programming Language :: Python :: 3.8",
                      "License :: OSI Approved :: MIT License",
                      "Topic :: Scientific/Engineering :: Bio-Informatics"],
         keywords="bioinformatics format BGEN binary",

@@ -1,9 +1,8 @@
+# pybgen - Module to process BGEN files
+
 [![Build Status](https://travis-ci.org/lemieuxl/pybgen.svg?branch=master)](https://travis-ci.org/lemieuxl/pybgen)
 [![Coverage Status](https://coveralls.io/repos/github/lemieuxl/pybgen/badge.svg?branch=master)](https://coveralls.io/github/lemieuxl/pybgen?branch=master)
 [![PyPI version](https://badge.fury.io/py/pybgen.svg)](http://badge.fury.io/py/pybgen)
-
-
-# pybgen - Module to process BGEN files
 
 `PyBGEN` is a Python module to read and write BGEN binary files and extract
 dosage data.
@@ -11,18 +10,16 @@ dosage data.
 A short documentation is available at
 [https://lemieuxl.github.io/pybgen/](https://lemieuxl.github.io/pybgen/).
 
-
 ## Dependencies
 
 The tool requires a standard [Python](http://python.org/) installation (2.7 and
-3.4 or higher are supported) with the following modules:
+3.6 or higher are supported) with the following modules:
 
 1. [numpy](http://www.numpy.org/) version 1.12.0 or latest
 2. [six](https://pythonhosted.org/six/) version 1.10.0 or latest
 
 The tool has been tested on *Linux*, but should work on *MacOS* and *Windows*
 operating systems as well.
-
 
 ## Installation
 
@@ -46,7 +43,6 @@ To add the channel, perform the following command:
 conda config --add channels http://statgen.org/wp-content/uploads/Softwares/pybgen
 ```
 
-
 ### Updating
 
 To update the module using `pip`:
@@ -65,7 +61,6 @@ conda update pybgen
 conda update pybgen -c http://statgen.org/wp-content/uploads/Softwares/pybgen
 ```
 
-
 ## Testing
 
 To test the module, just perform the following command:
@@ -78,9 +73,10 @@ $ python -m pybgen.tests
 ......................................................................
 ......................................................................
 ......................................................................
-............................................
+......................................................................
+......................................
 ----------------------------------------------------------------------
-Ran 464 tests in 19.772s
+Ran 528 tests in 13.171s
 
 OK
 ```
