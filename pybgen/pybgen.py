@@ -41,7 +41,7 @@ import numpy as np
 from six.moves import range
 
 try:
-    import zstd
+    import zstandard as zstd
     HAS_ZSTD = True
 except ImportError:
     HAS_ZSTD = False
@@ -486,7 +486,7 @@ class PyBGEN(object):
         # The minimum and maximum for ploidy (we only accept ploidy of 2)
         min_ploidy = _byte_to_int(data[0])
         max_ploidy = _byte_to_int(data[1])
-        if min_ploidy != 2 and max_ploidy != 2:
+        if min_ploidy != 2 or max_ploidy != 2:
             raise ValueError(
                 "{}: only accepting ploidy of "
                 "2".format(self._bgen.name)
