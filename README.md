@@ -1,6 +1,6 @@
 # pybgen - Module to process BGEN files
 
-[![Build Status](https://travis-ci.org/lemieuxl/pybgen.svg?branch=master)](https://travis-ci.org/lemieuxl/pybgen)
+[![Build Status](https://travis-ci.com/lemieuxl/pybgen.svg?branch=master)](https://travis-ci.com/lemieuxl/pybgen)
 [![Coverage Status](https://coveralls.io/repos/github/lemieuxl/pybgen/badge.svg?branch=master)](https://coveralls.io/github/lemieuxl/pybgen?branch=master)
 [![PyPI version](https://badge.fury.io/py/pybgen.svg)](http://badge.fury.io/py/pybgen)
 
