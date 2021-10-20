@@ -1,7 +1,6 @@
 # pybgen - Module to process BGEN files
 
-[![Build Status](https://travis-ci.com/lemieuxl/pybgen.svg?branch=master)](https://travis-ci.com/lemieuxl/pybgen)
-[![Coverage Status](https://coveralls.io/repos/github/lemieuxl/pybgen/badge.svg?branch=master)](https://coveralls.io/github/lemieuxl/pybgen?branch=master)
+![Build Status](https://github.com/lemieuxl/pybgen/actions/workflows/python-app.yml/badge.svg?branch=master)
 [![PyPI version](https://badgen.net/pypi/v/pybgen)](https://pypi.org/project/pybgen/)
 
 `PyBGEN` is a Python module to read and write BGEN binary files and extract
